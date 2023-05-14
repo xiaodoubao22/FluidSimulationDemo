@@ -1,4 +1,4 @@
-# LearnRendering
+# FluidSimulationDemo
 
 ## 简介
 
@@ -6,12 +6,16 @@
 
 ## 效果图
 
-![image](https://github.com/xiaodoubao22/FluidSimulationDemo/blob/master/figure/2d.gif)
+<img src="./figure/2d.gif" width="350">
 
 ## 三方库
 
 - GLM
 - GLFW
 - GLAD
+  
+  
+  
+  
 
 
