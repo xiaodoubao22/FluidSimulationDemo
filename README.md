@@ -6,7 +6,7 @@
 
 ## 效果图
 
-<img src="./figure/2d.gif" width="350">
+<img src="./figure/2d.gif" width="400">
 
 ## 三方库
 
