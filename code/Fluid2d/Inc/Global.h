@@ -9,6 +9,7 @@ namespace Glb {
 	const float exponent = 7.0f;
 	const float viscosity = 0.05f;
 	const float dt = 2e-4;
+	const int substep = 4;
 
 
 	class Timer {

@@ -15,12 +15,15 @@ namespace Fluid2d {
 	}
 
 	void Solver::Iterate() {
+		Glb::Timer timer;
+		timer.Start();
 		UpdateDensityAndPressure();
 		InitAccleration();
 		UpdateViscosityAccleration();
 		UpdatePressureAccleration();
 		EulerIntegrate();
 		BoundaryCondition();
+		std::cout << "solve time = " << timer.GetTime() << std::endl;
 	}
 
 	void Solver::UpdateDensityAndPressure() {
@@ -35,11 +38,10 @@ namespace Fluid2d {
 				}
 				density *= (mPs.mVolume * Glb::density0);
 				mPs.mDensity[i] = density;
-				//mPs.mDensity[i] = std::max(density, Glb::density0);		// 禁止膨胀
+				mPs.mDensity[i] = std::max(density, Glb::density0);		// 禁止膨胀
 			}
-
 			// 更新压强
-			//mPs.mPressure[i] = mPs.mStiffness* (std::powf(mPs.mDensity[i] / Glb::density0, mPs.mExponent) - 1.0f);
+			mPs.mPressure[i] = mPs.mStiffness* (std::powf(mPs.mDensity[i] / Glb::density0, mPs.mExponent) - 1.0f);
 		}
 		//int p = 0;
 		//for (int i = 0; i < 60; i++) {
@@ -53,7 +55,6 @@ namespace Fluid2d {
 
 	void Solver::InitAccleration() {
 		mPs.mAccleration = std::vector<glm::vec2>(mPs.mPositions.size(), glm::vec2(0.0f, -Glb::gravity));
-		//mPs.mAccleration = std::vector<glm::vec2>(mPs.mPositions.size(), glm::vec2(0.0f, 0.0f));
 	}
 
 
@@ -68,7 +69,7 @@ namespace Fluid2d {
 					int j = nInfo.index;
 					float dotDvToRad = glm::dot(mPs.mVelocity[i] - mPs.mVelocity[j], nInfo.radius);
 
-					float denom = nInfo.distance * nInfo.distance + 0.01f * mPs.mSupportRadius2;
+					float denom = nInfo.distance2 + 0.01f * mPs.mSupportRadius2;
 					viscosityForce += (mPs.mMass / mPs.mDensity[j]) * dotDvToRad * mW.Grad(nInfo.radius) / denom;
 				}
 				viscosityForce *= constFactor;
@@ -84,15 +85,13 @@ namespace Fluid2d {
 		//	}
 		//	std::cout << std::endl;
 		//}
-
 	}
 
 	void Solver::UpdatePressureAccleration() {
-		for (int i = 0; i < mPs.mPositions.size(); i++) {	// 对所有粒子
-			mPs.mDensity[i] = std::max(mPs.mDensity[i], Glb::density0);
-			mPs.mPressure[i] = mPs.mStiffness * (std::powf(mPs.mDensity[i] / Glb::density0, mPs.mExponent) - 1.0f);
+		std::vector<float> pressDivDens2(mPs.mPositions.size(), 0);		// p/(dens^2)
+		for (int i = 0; i < mPs.mPositions.size(); i++) {
+			pressDivDens2[i] = mPs.mPressure[i] / std::powf(mPs.mDensity[i], 2);
 		}
-
 
 		for (int i = 0; i < mPs.mPositions.size(); i++) {	// 对所有粒子
 			if (mPs.mNeighbors.size() != 0) {	// 有邻居
@@ -100,11 +99,9 @@ namespace Fluid2d {
 				glm::vec2 pressureForce(0.0f, 0.0f);
 				for (auto& nInfo : neighbors) {
 					int j = nInfo.index;
-					pressureForce += mPs.mDensity[j] * mPs.mVolume *
-						(mPs.mPressure[i] / std::powf(mPs.mDensity[i], 2) + mPs.mPressure[j] / std::powf(mPs.mDensity[j], 2)) *
-						mW.Grad(nInfo.radius);
+					pressureForce += mPs.mDensity[j] * (pressDivDens2[i] + pressDivDens2[j]) * mW.Grad(nInfo.radius);
 				}
-				mPs.mAccleration[i] -= pressureForce;
+				mPs.mAccleration[i] -= pressureForce * mPs.mVolume;
 			}
 		}
 

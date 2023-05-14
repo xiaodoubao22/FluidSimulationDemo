@@ -78,14 +78,10 @@ namespace Fluid2d {
 			// 对所有相邻Block
 			for (int dr = -1; dr <= 1; dr++) {
 				for (int dc = -1; dc <= 1; dc++) {
-					if (bc + dc < 0 || bc + dc >= mBlockColNum) {
+					if (bc + dc < 0 || bc + dc >= mBlockColNum || 
+						br + dr < 0 || br + dr >= mBlockRowNum) {
 						continue;
 					}
-
-					if (br + dr < 0 || br + dr >= mBlockRowNum) {
-						continue;
-					}
-
 
 					int bIdj = bIdi + dr * mBlockColNum + dc;
 					std::vector<int>& block = mBlocks[bIdj];
@@ -96,6 +92,7 @@ namespace Fluid2d {
 						NeighborInfo nInfo{};
 						nInfo.radius = mPositions[i] - mPositions[j];
 						nInfo.distance = glm::length(nInfo.radius);
+						nInfo.distance2 = nInfo.distance * nInfo.distance;
 						nInfo.index = j;
 						if (nInfo.distance <= mSupportRadius) {
 							mNeighbors[i].push_back(nInfo);
@@ -133,7 +130,7 @@ namespace Fluid2d {
 	void ParticalSystem::BuildBlockStructure() {
 		mBlocks = std::vector<std::vector<int>>(mBlockColNum * mBlockRowNum, std::vector<int>(0));
 
-		for (int i = 0; i < mPositions.size(); i++) {
+		for (int i = 0; i < mPositions.size(); i++) {	// 所有粒子放入自己的家
 			int bId = GetBlockIdByPosition(mPositions[i]);
 			mBlocks[bId].push_back(i);
 		}

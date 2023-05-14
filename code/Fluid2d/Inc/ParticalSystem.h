@@ -10,6 +10,7 @@ namespace Fluid2d {
     struct NeighborInfo {
         int index;
         float distance;
+        float distance2;
         glm::vec2 radius;
     };
 
@@ -37,7 +38,7 @@ namespace Fluid2d {
         float mParticalDiameter = 2.0 * mParticalRadius;
         float mVolume = 0.8 * mParticalDiameter * mParticalDiameter;    // 体积
         float mMass = Glb::density0 * mVolume;  // 质量
-        float mViscosity = 0.005;            // 粘度系数
+        float mViscosity = 0.01;            // 粘度系数
         float mExponent = 7.0f;              // 压力指数
         int mStiffness = 50.0f;            // 刚度
 
