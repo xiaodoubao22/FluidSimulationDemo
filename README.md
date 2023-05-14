@@ -6,7 +6,7 @@
 
 ## 效果图
 
-![image](https://github.com/xiaodoubao22/FluidSimulationDemo/blob/master/figure/2d.gif)
+<img src="./figure/2d.gif" width="400">
 
 ## 三方库
 
