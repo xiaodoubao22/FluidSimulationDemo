@@ -2,6 +2,7 @@
 #define PARTICAL_SYSTEM_H
 
 #include <vector>
+#include <list>
 #include <glm/glm.hpp>
 #include "Global.h"
 
@@ -21,7 +22,7 @@ namespace Fluid2d {
 
         void SetContainerSize(glm::vec2 corner, glm::vec2 size);
 
-        int32_t AddFluidBlock(glm::vec2 corner, glm::vec2 size, glm::vec2 v0);
+        int32_t AddFluidBlock(glm::vec2 corner, glm::vec2 size, glm::vec2 v0, float particalSpace);
 
         void SearchNeighbors();
 
@@ -29,6 +30,8 @@ namespace Fluid2d {
 
         void BuildBlockStructure();
 
+    private:
+        int32_t AddBoundary(glm::vec2 corner, glm::vec2 size);
 
     public:
         // 粒子参数
@@ -42,6 +45,7 @@ namespace Fluid2d {
         float mExponent = 7.0f;              // 压力指数
         int mStiffness = 50.0f;            // 刚度
 
+        int mStartIndex = 0;
         std::vector<glm::vec2> mPositions;
         std::vector<glm::vec2> mAccleration;
         std::vector<glm::vec2> mVelocity;
@@ -52,6 +56,7 @@ namespace Fluid2d {
         // 容器参数
         glm::vec2 mLowerBound = glm::vec2(-1.0f, -1.0f);
         glm::vec2 mUpperBound = glm::vec2(1.0f, 1.0f);
+        glm::vec2 mContainerCenter = glm::vec2(0.0f, 0.0f);
         std::vector<std::vector<int>> mBlocks;
         glm::vec2 mBlockSize = glm::vec2(0.5, 0.5);
         uint32_t mBlockRowNum = 4;

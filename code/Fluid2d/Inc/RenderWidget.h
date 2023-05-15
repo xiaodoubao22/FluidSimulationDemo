@@ -45,10 +45,16 @@ private:
 	int mWindowHeight = 1000;
 
 	Shader* mParticalShader = nullptr;
+	Shader* mSdfShader = nullptr;
+	Shader* mMilkShader = nullptr;
 
 	GLuint mVaoParticals = 0;
 	GLuint mPositionBuffer = 0;
 	GLuint mDensityBuffer = 0;
+
+	GLuint mFboSdf = 0;
+	GLuint mTextureSdf = 0;
+	GLuint mRboSdf = 0;
 
 	size_t mParticalNum = 0;
 

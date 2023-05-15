@@ -16,13 +16,26 @@ namespace Fluid2d {
 	void ParticalSystem::SetContainerSize(glm::vec2 corner, glm::vec2 size) {
 		mLowerBound = corner;
 		mUpperBound = corner + size;
+		mContainerCenter = corner + 0.5f * size;
 
 		mBlockRowNum = floor(size.y / mSupportRadius);
 		mBlockColNum = floor(size.x / mSupportRadius);
 		mBlockSize = glm::vec2(size.x / mBlockColNum, size.y / mBlockRowNum);
+
+
+		mPositions.clear();
+		mVelocity.clear();
+		mAccleration.clear();
+
+		mStartIndex = 0;
+		
+		//mStartIndex += AddBoundary(mLowerBound, glm::vec2(size.x, mSupportRadius));
+		//mStartIndex += AddBoundary(glm::vec2(mLowerBound.x, mUpperBound.y - mSupportRadius), glm::vec2(size.x, mSupportRadius));
+		//mStartIndex += AddBoundary(glm::vec2(mLowerBound.x, mLowerBound.y + mSupportRadius), glm::vec2(mSupportRadius, size.y - 2.0f * mSupportRadius));
+		//mStartIndex += AddBoundary(glm::vec2(mUpperBound.x - mSupportRadius, mLowerBound.y + mSupportRadius), glm::vec2(mSupportRadius, size.y - 2.0f * mSupportRadius));
 	}
 
-	int32_t ParticalSystem::AddFluidBlock(glm::vec2 corner, glm::vec2 size, glm::vec2 v0) {
+	int32_t ParticalSystem::AddFluidBlock(glm::vec2 corner, glm::vec2 size, glm::vec2 v0, float particalSpace) {
 		glm::vec2 blockLowerBound = corner;
 		glm::vec2 blockUpperBound = corner + size;
 
@@ -33,8 +46,8 @@ namespace Fluid2d {
 			return -1;
 		}
 
-		int width = size.x / mParticalDiameter;
-		int height = size.y / mParticalDiameter;
+		int width = size.x / particalSpace;
+		int height = size.y / particalSpace;
 
 		std::vector<glm::vec2> position(width * height);
 		std::vector<glm::vec2> velocity(width * height, v0);
@@ -43,7 +56,7 @@ namespace Fluid2d {
 		int p = 0;
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				position[p] = corner + glm::vec2(j * mParticalDiameter * 0.6 + mParticalRadius, i * mParticalDiameter * 0.6 + mParticalRadius);
+				position[p] = corner + glm::vec2((j + 0.5) * particalSpace, (i + 0.5) * particalSpace);
 				if (i % 2) {
 					position[p].x += mParticalRadius;
 				}
@@ -51,10 +64,10 @@ namespace Fluid2d {
 			}
 		}
 
-		mPositions = position;
-		mVelocity = velocity;
-		mAccleration = accleration;
-		return 0;
+		mPositions.insert(mPositions.end(), position.begin(), position.end());
+		mVelocity.insert(mVelocity.end(), velocity.begin(), velocity.end());
+		mAccleration.insert(mAccleration.end(), accleration.begin(), accleration.end());
+		return position.size();
 
 	}
 
@@ -68,7 +81,7 @@ namespace Fluid2d {
 		timer.Start();
 		mNeighbors = std::vector<std::vector<NeighborInfo>>(mPositions.size(), std::vector<NeighborInfo>(0));
 
-		for (int i = 0; i < mPositions.size(); i++) {	// 对所有粒子查找邻居
+		for (int i = mStartIndex; i < mPositions.size(); i++) {	// 对所有粒子查找邻居
 			glm::vec2 deltePos = mPositions[i] - mLowerBound;
 			uint32_t bc = floor(deltePos.x / mBlockSize.x);
 			uint32_t br = floor(deltePos.y / mBlockSize.y);
@@ -143,6 +156,35 @@ namespace Fluid2d {
 		//	}
 		//	std::cout << std::endl;
 		//}
+	}
+
+	int32_t ParticalSystem::AddBoundary(glm::vec2 corner, glm::vec2 size) {
+		float space = mParticalRadius / 4.0f;
+		int rows = floor(size.y / space);
+		int cols = floor(size.x / space);
+		
+		float rowOffset = (size.y - ((float)rows - 1.0f) * space) / 2.0f;
+		float colOffset = (size.x - ((float)cols - 1.0f) * space) / 2.0f;
+
+		std::vector<glm::vec2> position(rows * cols);
+		std::vector<glm::vec2> velocity(rows * cols, glm::vec2(0.0f, 0.0f));
+		std::vector<glm::vec2> accleration(rows * cols, glm::vec2(0.0f, 0.0f));
+
+		int p = 0;
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				float x = colOffset + j * space;
+				float y = rowOffset + i * space;
+				position[p] = corner + glm::vec2(x, y);
+				
+				p++;
+			}
+		}
+
+		mPositions.insert(mPositions.end(), position.begin(), position.end());
+		mVelocity.insert(mVelocity.end(), velocity.begin(), velocity.end());
+		mAccleration.insert(mAccleration.end(), accleration.begin(), accleration.end());
+		return position.size();
 	}
 
 }

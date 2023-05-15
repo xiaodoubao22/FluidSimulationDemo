@@ -9,17 +9,13 @@ public:
 	Shader();
 	~Shader();
 
-	int32_t BuildFromFile(std::string& vertPath, std::string& fragPath);
+	int32_t BuildFromFile(std::string& vertPath, std::string& geomPath, std::string& fragPath);
 
 	void Use();
 
 	void UnUse();
 
-	void GetUniformParaId();
-
-	void SetUniform();
-
-private:
+//private:
 	GLuint mId = 0;
 
 };

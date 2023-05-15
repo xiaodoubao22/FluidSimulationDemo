@@ -12,7 +12,7 @@ int main() {
 
 	Fluid2d::ParticalSystem ps;
 	ps.SetContainerSize(glm::vec2(-1.0, -1.0), glm::vec2(2.0, 2.0));
-	ps.AddFluidBlock(glm::vec2(-0.3, -0.3), glm::vec2(0.8, 0.8), glm::vec2(-2.0f, -20.0f));
+	ps.AddFluidBlock(glm::vec2(-0.3, -0.3), glm::vec2(0.5, 0.5), glm::vec2(-2.0f, -20.0f), 0.01f * 0.6f);
 
 	Fluid2d::Solver sv(ps);
 

@@ -54,14 +54,15 @@ namespace Fluid2d {
 	}
 
 	void Solver::InitAccleration() {
-		mPs.mAccleration = std::vector<glm::vec2>(mPs.mPositions.size(), glm::vec2(0.0f, -Glb::gravity));
+		std::fill(mPs.mAccleration.begin() + mPs.mStartIndex, mPs.mAccleration.end(), glm::vec2(0.0f, -Glb::gravity));
+		//mPs.mAccleration = std::vector<glm::vec2>(mPs.mPositions.size(), glm::vec2(0.0f, -Glb::gravity));
 	}
 
 
 	void Solver::UpdateViscosityAccleration() {
 		float dim = 2.0f;
 		float constFactor = 2.0f * (dim + 2.0f) * mPs.mViscosity;
-		for (int i = 0; i < mPs.mPositions.size(); i++) {	// 对所有粒子
+		for (int i = mPs.mStartIndex; i < mPs.mPositions.size(); i++) {	// 对所有粒子
 			if (mPs.mNeighbors.size() != 0) {	// 有邻居
 				std::vector<NeighborInfo>& neighbors = mPs.mNeighbors[i];
 				glm::vec2 viscosityForce(0.0f, 0.0f);
@@ -93,7 +94,7 @@ namespace Fluid2d {
 			pressDivDens2[i] = mPs.mPressure[i] / std::powf(mPs.mDensity[i], 2);
 		}
 
-		for (int i = 0; i < mPs.mPositions.size(); i++) {	// 对所有粒子
+		for (int i = mPs.mStartIndex; i < mPs.mPositions.size(); i++) {	// 对所有粒子
 			if (mPs.mNeighbors.size() != 0) {	// 有邻居
 				std::vector<NeighborInfo>& neighbors = mPs.mNeighbors[i];
 				glm::vec2 pressureForce(0.0f, 0.0f);
@@ -121,7 +122,7 @@ namespace Fluid2d {
 	}
 
 	void Solver::EulerIntegrate() {
-		for (int i = 0; i < mPs.mPositions.size(); i++) {	// 对所有粒子
+		for (int i = mPs.mStartIndex; i < mPs.mPositions.size(); i++) {	// 对所有粒子
 			mPs.mVelocity[i] += Glb::dt * mPs.mAccleration[i];
 			mPs.mVelocity[i] = glm::clamp(mPs.mVelocity[i], glm::vec2(-100.0f), glm::vec2(100.0f));
 			mPs.mPositions[i] += Glb::dt * mPs.mVelocity[i];
@@ -131,16 +132,23 @@ namespace Fluid2d {
 	void Solver::BoundaryCondition() {
 		for (int i = 0; i < mPs.mPositions.size(); i++) {	// 对所有粒子
 			glm::vec2& position = mPs.mPositions[i];
-			if (position.x < mPs.mLowerBound.x + 0.025f ||
-				position.y < mPs.mLowerBound.y + 0.025f ||
-				position.x > mPs.mUpperBound.x - 0.025f ||
-				position.y > mPs.mUpperBound.x - 0.025f) {
-				mPs.mVelocity[i] = -1.0f * mPs.mVelocity[i];
-				mPs.mPositions[i] += Glb::dt * mPs.mVelocity[i];
-
-				mPs.mVelocity[i] = glm::clamp(mPs.mVelocity[i], glm::vec2(-100.0f), glm::vec2(100.0f));
+			bool invFlag = false;
+			if (position.y < mPs.mLowerBound.y + 0.025f ||
+				position.y > mPs.mUpperBound.y - 0.025f) {
+				mPs.mVelocity[i].y = -1.0f * mPs.mVelocity[i].y;
+				invFlag = true;
 			}
 
+			if (position.x < mPs.mLowerBound.x + 0.025f ||
+				position.x > mPs.mUpperBound.x - 0.025f) {
+				mPs.mVelocity[i].x = -1.0f * mPs.mVelocity[i].x;
+				invFlag = true;
+			}
+
+			if (invFlag) {
+				mPs.mPositions[i] += Glb::dt * mPs.mVelocity[i];
+				mPs.mVelocity[i] = glm::clamp(mPs.mVelocity[i], glm::vec2(-100.0f), glm::vec2(100.0f));	// 速度限制
+			}
 		}
 	}
 

@@ -2,6 +2,7 @@
 
 
 #include <iostream>
+#include <fstream>
 
 
 RenderWidget::RenderWidget() {
@@ -17,27 +18,84 @@ int32_t RenderWidget::Init() {
         return -1;
     }
     
+    // 初始化shader
     std::string particalVertShaderPath = "../code/Fluid2d/Shaders/DrawParticals.vert";
     std::string particalFragShaderPath = "../code/Fluid2d/Shaders/DrawParticals.frag";
     mParticalShader = new Shader();
-    mParticalShader->BuildFromFile(particalVertShaderPath, particalFragShaderPath);
-    glViewport(0, 0, mWindowWidth, mWindowHeight);
+    mParticalShader->BuildFromFile(particalVertShaderPath, std::string(""), particalFragShaderPath);
 
+    std::string ballVertShaderPath = "../code/Fluid2d/Shaders/DrawSdf.vert";
+    std::string ballGeomShaderPath = "../code/Fluid2d/Shaders/DrawSdf.geom";
+    std::string ballFragShaderPath = "../code/Fluid2d/Shaders/DrawSdf.frag";
+    mSdfShader = new Shader();
+    mSdfShader->BuildFromFile(ballVertShaderPath, ballGeomShaderPath, ballFragShaderPath);
 
+    std::string milkVertShaderPath = "../code/Fluid2d/Shaders/DrawMilk.vert";
+    std::string milkFragShaderPath = "../code/Fluid2d/Shaders/DrawMilk.frag";
+    mMilkShader = new Shader();
+    mMilkShader->BuildFromFile(milkVertShaderPath, std::string(""), milkFragShaderPath);
+    glUniform1i(glGetUniformLocation(mMilkShader->mId, "textureSdf"), 0);
+    
+    // 生成vao
     glGenVertexArrays(1, &mVaoParticals);
     glGenBuffers(1, &mPositionBuffer);
     glGenBuffers(1, &mDensityBuffer);
+
+    // 绘制SDF的frame buffer
+    glGenFramebuffers(1, &mFboSdf);
+    glBindFramebuffer(GL_FRAMEBUFFER, mFboSdf);
+    // 生成纹理
+    glGenTextures(1, &mTextureSdf);
+    glBindTexture(GL_TEXTURE_2D, mTextureSdf);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1000, 1000, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    // 绑定到FBO
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTextureSdf, 0);
+    // 生成RBO
+    glGenRenderbuffers(1, &mRboSdf);
+    glBindRenderbuffer(GL_RENDERBUFFER, mRboSdf);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1000, 1000);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    // 绑定到FBO
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRboSdf);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "ERROR: SDF Framebuffer is not complete!" << std::endl;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // 视口大小
+    glViewport(0, 0, mWindowWidth, mWindowHeight);
 }
 
 void RenderWidget::Update() {
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    //glEnable(GL_DEPTH_TEST);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // 画粒子
-    mParticalShader->Use();
+    // 画距离场
+    glBindFramebuffer(GL_FRAMEBUFFER, mFboSdf);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mSdfShader->Use();
     glEnable(GL_PROGRAM_POINT_SIZE);
     glBindVertexArray(mVaoParticals);
     glDrawArrays(GL_POINTS, 0, mParticalNum);
+
+    // 画牛奶
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    mMilkShader->Use();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mTextureSdf);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     // 显示FPS
     char title[128] = "";
@@ -53,6 +111,8 @@ int32_t RenderWidget::Destroy() {
     glDeleteBuffers(1, &mPositionBuffer);
     glDeleteBuffers(1, &mDensityBuffer);
     delete mParticalShader;
+    delete mSdfShader;
+    delete mMilkShader;
     glfwTerminate();
     return 0;
 }
