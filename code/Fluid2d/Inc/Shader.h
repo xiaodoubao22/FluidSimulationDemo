@@ -6,17 +6,17 @@
 
 class Shader {
 public:
-	Shader();
-	~Shader();
+    Shader();
+    ~Shader();
 
-	int32_t BuildFromFile(std::string& vertPath, std::string& geomPath, std::string& fragPath);
+    int32_t BuildFromFile(std::string& vertPath, std::string& geomPath, std::string& fragPath);
 
-	void Use();
+    void Use();
 
-	void UnUse();
+    void UnUse();
 
 //private:
-	GLuint mId = 0;
+    GLuint mId = 0;
 
 };
 

@@ -1,6 +1,5 @@
 #include "RenderWidget.h"
 
-
 #include <iostream>
 #include <fstream>
 
@@ -72,25 +71,33 @@ int32_t RenderWidget::Init() {
 }
 
 void RenderWidget::Update() {
-    //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    //// »­Á£×Ó
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
     //glEnable(GL_DEPTH_TEST);
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // »­¾àÀë³¡
+    //glBindVertexArray(mVaoParticals);
+    //mParticalShader->Use();
+    //glEnable(GL_PROGRAM_POINT_SIZE);
+    //glDrawArrays(GL_POINTS, 0, mParticalNum);
+
+    // »­Á£×ÓÇò
     glBindFramebuffer(GL_FRAMEBUFFER, mFboSdf);
     glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glBindVertexArray(mVaoParticals);
     mSdfShader->Use();
     glEnable(GL_PROGRAM_POINT_SIZE);
-    glBindVertexArray(mVaoParticals);
     glDrawArrays(GL_POINTS, 0, mParticalNum);
 
     // »­Å£ÄÌ
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glEnable(GL_DEPTH_TEST);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glDisable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT);
 
     mMilkShader->Use();
     glActiveTexture(GL_TEXTURE0);
@@ -144,6 +151,7 @@ void RenderWidget::LoadVertexes(Fluid2d::ParticalSystem& ps) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * ps.mDensity.size(), ps.mDensity.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
+    glBindVertexArray(0);
 
     mParticalNum = ps.mPositions.size();
 }

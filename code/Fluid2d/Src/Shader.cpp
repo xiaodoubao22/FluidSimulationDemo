@@ -4,7 +4,7 @@
 #include <iostream>
 
 Shader::Shader() {
-	mId = 0;
+    mId = 0;
 }
 
 Shader::~Shader() {
@@ -12,8 +12,8 @@ Shader::~Shader() {
 }
 
 int32_t Shader::BuildFromFile(std::string& vertPath, std::string& geomPath, std::string& fragPath) {
-	std::string vertexCode, geometryCode, fragmentCode;
-	std::ifstream vertShaderFile, geomShaderFile, fragShaderFile;
+    std::string vertexCode, geometryCode, fragmentCode;
+    std::ifstream vertShaderFile, geomShaderFile, fragShaderFile;
     std::stringstream vShaderStream, gShaderStream, fShaderStream;
     // ∂¡»° vertex shader
     vertShaderFile.open(vertPath);

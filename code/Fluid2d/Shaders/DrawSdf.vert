@@ -6,5 +6,5 @@ layout(location = 1) in float density;
 
 void main() {
 
-	gl_Position = vec4(pointPosition, 0.0, 1.0);
+    gl_Position = vec4(pointPosition, 0.0, 1.0);
 }

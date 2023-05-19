@@ -6,29 +6,29 @@
 
 namespace Fluid2d {
 
-	class WCubicSpline2d {
-	public:
-		WCubicSpline2d() = delete;
-		explicit WCubicSpline2d(float h);
-		~WCubicSpline2d();
+    class WCubicSpline2d {
+    public:
+        WCubicSpline2d() = delete;
+        explicit WCubicSpline2d(float h);
+        ~WCubicSpline2d();
 
-		float Value(float distance);
+        float Value(float distance);
 
-		glm::vec2 Grad(glm::vec2 radius);
-		
-	private:
-		float CalculateValue(float distance);
+        glm::vec2 Grad(glm::vec2 radius);
+        
+    private:
+        float CalculateValue(float distance);
 
-		glm::vec2 CalculateGrad(glm::vec2 radius);
+        glm::vec2 CalculateGrad(glm::vec2 radius);
 
-	private:
-		float mH;
-		float mH2;
-		float mSigma;
-		glm::uvec2 mBufferSize;
-		std::vector<std::vector<glm::vec2>> mGradBuffer;
-		std::vector<float> mValueBuffer;
-	};
+    private:
+        float mH;
+        float mH2;
+        float mSigma;
+        glm::uvec2 mBufferSize;
+        std::vector<std::vector<glm::vec2>> mGradBuffer;
+        std::vector<float> mValueBuffer;
+    };
 
 }
 

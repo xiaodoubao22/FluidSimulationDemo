@@ -6,31 +6,31 @@
 
 namespace Fluid2d {
 
-	class Solver {
-	public:
-		explicit Solver(Fluid2d::ParticalSystem& ps);
-		~Solver();
+    class Solver {
+    public:
+        explicit Solver(Fluid2d::ParticalSystem& ps);
+        ~Solver();
 
-		void Iterate();
+        void Iterate();
 
-	private:
-		void UpdateDensityAndPressure();
+    private:
+        void UpdateDensityAndPressure();
 
-		void InitAccleration();
+        void InitAccleration();
 
-		void UpdateViscosityAccleration();
+        void UpdateViscosityAccleration();
 
-		void UpdatePressureAccleration();
+        void UpdatePressureAccleration();
 
-		void EulerIntegrate();
+        void EulerIntegrate();
 
-		void BoundaryCondition();
+        void BoundaryCondition();
 
-	private:
-		ParticalSystem& mPs;
-		WCubicSpline2d mW;
+    private:
+        ParticalSystem& mPs;
+        WCubicSpline2d mW;
 
-	};
+    };
 
 }
 
