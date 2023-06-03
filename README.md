@@ -8,7 +8,7 @@
 
 ### 3D模拟
 
-<img src="./figure/3d.gif" width="400">
+<img src="./figure/3dFluid.gif" width="400">
 
 ### 2D模拟及牛奶效果渲染
 
