@@ -49,6 +49,8 @@ namespace Fluid3d {
         mComputeShader->SetVec3("containerLowerBound", ps.mLowerBound);
         mComputeShader->SetVec3("containerUpperBound", ps.mUpperBound);
         glUniform1iv(glGetUniformLocation(mComputeShader->GetId(), "blockIdOffs"), 27, ps.mBlockIdOffs.data());
+
+        mComputeShader->SetFloat("gSupportRadius", Para3d::supportRadius);
         mComputeShader->SetFloat("gDensity0", Para3d::density0);
         mComputeShader->SetFloat("gVolume", ps.mVolume);
         mComputeShader->SetFloat("gMass", 0.5);
@@ -108,11 +110,6 @@ namespace Fluid3d {
         glfwSwapBuffers(mWindow);   // ½»»»Ç°ºó»º³å
     }
 
-    int32_t RenderWidget::Destroy() {
-        glfwTerminate();
-        return 0;
-    }
-
     bool RenderWidget::ShouldClose() {
         return glfwWindowShouldClose(mWindow);
     }
@@ -158,7 +155,6 @@ namespace Fluid3d {
             thisPtr->mCamera.ProcessMove(glm::vec2(xOffset, yOffset));
         }
         
-
         thisPtr->mLastX = xpos;
         thisPtr->mLastY = ypos;
     }
@@ -344,6 +340,26 @@ namespace Fluid3d {
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         mScreenQuad->UnUse();
 #endif
+    }
+
+    int32_t RenderWidget::Destroy() {
+        delete mScreenQuad;
+        delete mDrawColor3d;
+        delete mComputeShader;
+
+        glDeleteVertexArrays(1, &mVaoNull);
+        glDeleteVertexArrays(1, &mVaoParticals);
+        glDeleteVertexArrays(1, &mVaoCoord);
+
+        glDeleteBuffers(1, &mCoordVertBuffer);
+        glDeleteBuffers(1, &mBufferParticals);
+        glDeleteBuffers(1, &mBufferBlocks);
+
+        glDeleteTextures(1, &mTestTexture);
+        glDeleteTextures(1, &mTexKernelBuffer);
+
+        glfwTerminate();
+        return 0;
     }
 
 }

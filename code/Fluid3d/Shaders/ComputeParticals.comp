@@ -2,7 +2,7 @@
 // ----------consts----------
 const float gGravity = 9.8;
 const float gDeltaT = 4e-4;
-const float supportRadius = 0.025;
+const float gEps = 1e-5;
 
 //  ----------uniform----------
 uniform uint pass;
@@ -14,6 +14,7 @@ uniform vec3 containerLowerBound;
 uniform vec3 containerUpperBound;
 uniform int blockIdOffs[27];
 
+uniform float gSupportRadius;
 uniform vec3 gGravityDir;
 uniform highp float gDensity0;
 uniform highp float gVolume;
@@ -21,8 +22,6 @@ uniform highp float gMass;
 uniform highp float gStiffness;
 uniform highp float gExponent;
 uniform highp float gViscosity;
-
-uniform sampler1D kernelBuffer;
 
 // local size
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -51,6 +50,8 @@ layout(binding=5) buffer BlockExtens
 
 layout(rgba32f, binding = 0) uniform image2D imgOutput;
 
+uniform sampler1D kernelBuffer;
+
 // ----------functions----------
 void EulerIntegration(inout ParticalInfo3d pi) {
     pi.velosity = pi.velosity + gDeltaT * pi.accleration;
@@ -66,8 +67,8 @@ void ComputeDensityAndPress(inout ParticalInfo3d pi) {
         for(uint j = blockExtens[bIdj].x; j < blockExtens[bIdj].y; j++) {   // for all neighbor particals
             vec3 radiusIj = pi.position - particals[j].position;
             float diatanceIj = length(radiusIj);
-            if (particalId != j && diatanceIj <= supportRadius) {
-                pi.density += texture(kernelBuffer, diatanceIj / supportRadius).r;
+            if (particalId != j && diatanceIj <= gSupportRadius) {
+                pi.density += texture(kernelBuffer, diatanceIj / gSupportRadius).r;
             }
         }
     }
@@ -89,10 +90,10 @@ void ComputeAccleration(inout ParticalInfo3d pi) {
         for(uint j = blockExtens[bIdj].x; j < blockExtens[bIdj].y; j++) {   // for all neighbor particals
             vec3 radiusIj = pi.position - particals[j].position;
             float diatanceIj = length(radiusIj);
-            if (particalId != j && diatanceIj <= supportRadius) {
+            if (particalId != j && diatanceIj <= gSupportRadius) {
                 float dotDvToRad = dot(pi.velosity - particals[j].velosity, radiusIj);
-                float denom = diatanceIj * diatanceIj + 0.01 * supportRadius * supportRadius;
-                vec3 wGrad = texture(kernelBuffer, diatanceIj / supportRadius).g * radiusIj;
+                float denom = diatanceIj * diatanceIj + 0.01 * gSupportRadius * gSupportRadius;
+                vec3 wGrad = texture(kernelBuffer, diatanceIj / gSupportRadius).g * radiusIj;
                 viscosityForce += (gMass / particals[j].density) * dotDvToRad * wGrad / denom;
                 pressureForce += particals[j].density * (pi.pressDivDens2 + particals[j].pressDivDens2) * wGrad;
             }
@@ -105,32 +106,32 @@ void ComputeAccleration(inout ParticalInfo3d pi) {
 void BoundaryCondition(inout ParticalInfo3d pi) {
     bool invFlag = false; 
 
-    if (pi.position.x < containerLowerBound.x + supportRadius) {
+    if (pi.position.x < containerLowerBound.x + gSupportRadius) {
         pi.velosity.x = abs(pi.velosity.x);
         invFlag = true;
     }
 
-    if (pi.position.y < containerLowerBound.y + supportRadius) {
+    if (pi.position.y < containerLowerBound.y + gSupportRadius) {
         pi.velosity.y = abs(pi.velosity.y);
         invFlag = true;
     }
 
-    if (pi.position.z < containerLowerBound.z + supportRadius) {
+    if (pi.position.z < containerLowerBound.z + gSupportRadius) {
         pi.velosity.z = abs(pi.velosity.z);
         invFlag = true;
     }
 
-    if (pi.position.x > containerUpperBound.x - supportRadius) {
+    if (pi.position.x > containerUpperBound.x - gSupportRadius) {
         pi.velosity.x = -abs(pi.velosity.x);
         invFlag = true;
     }
 
-    if (pi.position.y > containerUpperBound.y - supportRadius) {
+    if (pi.position.y > containerUpperBound.y - gSupportRadius) {
         pi.velosity.y = -abs(pi.velosity.y);
         invFlag = true;
     }
 
-    if (pi.position.z > containerUpperBound.z - supportRadius) {
+    if (pi.position.z > containerUpperBound.z - gSupportRadius) {
         pi.velosity.z = -abs(pi.velosity.z);
         invFlag = true;
     }
@@ -139,7 +140,7 @@ void BoundaryCondition(inout ParticalInfo3d pi) {
         pi.velosity *= 0.9;
     }
 
-    pi.position = clamp(pi.position, containerLowerBound + vec3(supportRadius), containerUpperBound - vec3(supportRadius));
+    pi.position = clamp(pi.position, containerLowerBound + vec3(gSupportRadius + gEps), containerUpperBound - vec3(gSupportRadius + gEps));
     pi.velosity = clamp(pi.velosity, vec3(-100.0), vec3(100.0));    // 速度限制
 }
 
@@ -148,7 +149,6 @@ void CalculateBlockId(inout ParticalInfo3d pi) {
     uvec3 blockPosition = uvec3(floor(deltePos / blockSize));
 	pi.blockId = blockPosition.z * blockNum.x * blockNum.y + blockPosition.y * blockNum.x + blockPosition.x;
 }
-
 
 // ----------main----------
 void main() {
