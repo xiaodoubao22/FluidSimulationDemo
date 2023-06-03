@@ -10,11 +10,11 @@ namespace Fluid3d {
         mTargetPoint = glm::vec3(0.15, 0.15, 0.1);
         UpdateView();
 
-        mAspect = 1.0f;
-        mNearPlane = 0.1f;
-        mFarPlane = 100.0f;
-        mFovyDeg = 60.0f;
-        mProjection = glm::perspective(glm::radians(mFovyDeg), mAspect, mNearPlane, mFarPlane);
+        float aspect = 1.0f;
+        float nearPlane = 0.1f;
+        float farPlane = 100.0f;
+        float fovyDeg = 60.0f;
+        mProjection = glm::perspective(glm::radians(fovyDeg), aspect, nearPlane, farPlane);
 	}
 
 	RenderCamera::~RenderCamera() {
@@ -36,6 +36,10 @@ namespace Fluid3d {
     void RenderCamera::ProcessScale(float offset) {
         mTargetPoint += offset * mSensitiveFront * mFront;
         UpdateView();
+    }
+
+    void RenderCamera::SetPerspective(float aspect, float nearPlane, float mFarPlane, float fovyDeg) {
+        mProjection = glm::perspective(glm::radians(fovyDeg), aspect, nearPlane, mFarPlane);
     }
 
     glm::mat4 RenderCamera::GetView() {

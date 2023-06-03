@@ -133,6 +133,7 @@ namespace Fluid3d {
         // ’“µΩthis÷∏’Î
         auto thisPtr = reinterpret_cast<RenderWidget*>(glfwGetWindowUserPointer(window));
         glViewport(0, 0, width, height);
+        thisPtr->mCamera.SetPerspective(float(width) / float(height));
     }
 
     void RenderWidget::CursorPosCallBack(GLFWwindow* window, double xpos, double ypos) {
@@ -213,7 +214,6 @@ namespace Fluid3d {
         glfwSetCursorPosCallback(mWindow, CursorPosCallBack);
         glfwSetMouseButtonCallback(mWindow, MouseButtonCallback);
         glfwSetScrollCallback(mWindow, ScrollCallback);
-
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
@@ -318,9 +318,6 @@ namespace Fluid3d {
 
 
     void RenderWidget::DrawParticals() {
-        glm::mat4 view = glm::lookAt(glm::vec3(1.0, 1.0, 0.6) * 0.5f, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
-        glm::mat4 proj = glm::perspective(glm::radians(60.0f), 1.0f, 0.1f, 100.0f);
-
         glFinish();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -330,7 +327,7 @@ namespace Fluid3d {
 
         mDrawColor3d->Use();
         mDrawColor3d->SetMat4("view", mCamera.GetView());
-        mDrawColor3d->SetMat4("projection", proj);
+        mDrawColor3d->SetMat4("projection", mCamera.GetProjection());
         glBindVertexArray(mVaoCoord);
         glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, indices);
         glBindVertexArray(mVaoParticals);

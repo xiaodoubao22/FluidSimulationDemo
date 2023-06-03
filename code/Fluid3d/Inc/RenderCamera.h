@@ -11,7 +11,8 @@ namespace Fluid3d {
         void ProcessMove(glm::vec2 offset);
         void ProcessRotate(glm::vec2 offset);
         void ProcessScale(float offset);
-
+        void SetPerspective(float aspect = 1.0f, float nearPlane = 0.1f, float mFarPlane = 100.0f, float fovyDeg = 60.0f);
+        
         glm::mat4 GetView();
         glm::mat4 GetProjection();
         glm::vec3 GetUp();
@@ -37,10 +38,6 @@ namespace Fluid3d {
         glm::vec3 mWorldUp;
         glm::mat4 mView;
 
-        float mAspect;
-        float mNearPlane;
-        float mFarPlane;
-        float mFovyDeg;
         glm::mat4 mProjection;
 
     };
