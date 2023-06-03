@@ -44,9 +44,9 @@ private:
     int mWindowWidth = 1000;
     int mWindowHeight = 1000;
 
-    Shader* mParticalShader = nullptr;
-    Shader* mSdfShader = nullptr;
-    Shader* mMilkShader = nullptr;
+    Glb::Shader* mParticalShader = nullptr;
+    Glb::Shader* mSdfShader = nullptr;
+    Glb::Shader* mMilkShader = nullptr;
 
     GLuint mVaoParticals = 0;
     GLuint mPositionBuffer = 0;

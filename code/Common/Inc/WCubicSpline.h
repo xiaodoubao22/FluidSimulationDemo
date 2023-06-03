@@ -1,11 +1,10 @@
-#ifndef W_CUBE_SPLINE_2D_H
-#define W_CUBE_SPLINE_2D_H
+#ifndef W_CUBE_SPLINE_H
+#define W_CUBE_SPLINE_H
 
 #include <glm/glm.hpp>
 #include <vector>
 
-namespace Fluid2d {
-
+namespace Glb {
     class WCubicSpline2d {
     public:
         WCubicSpline2d() = delete;
@@ -30,9 +29,29 @@ namespace Fluid2d {
         std::vector<float> mValueBuffer;
     };
 
+    class WCubicSpline3d {
+    public:
+        WCubicSpline3d() = delete;
+        explicit WCubicSpline3d(float h);
+        ~WCubicSpline3d();
+        
+        float_t* GetData();
+        uint32_t GetBufferSize();
+
+    private:
+        float CalculateValue(float distance);
+
+        float CalculateGradFactor(float distance);
+
+    private:
+        float mH;
+        float mH2;
+        float mH3;
+        float mSigma;
+        uint32_t mBufferSize;
+        std::vector<glm::vec2> mValueAndGradFactorBuffer;
+    };
+
 }
 
-
-
-
-#endif // !W_CUBE_SPLINE_2D_H
+#endif // !W_CUBE_SPLINE_H

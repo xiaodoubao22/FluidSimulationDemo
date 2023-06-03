@@ -23,11 +23,11 @@ namespace Fluid2d {
         UpdatePressureAccleration();
         EulerIntegrate();
         BoundaryCondition();
-        std::cout << "solve time = " << timer.GetTime() << std::endl;
+        //std::cout << "solve time = " << timer.GetTime() << std::endl;
     }
 
     void Solver::UpdateDensityAndPressure() {
-        mPs.mDensity = std::vector<float>(mPs.mPositions.size(), Glb::density0);
+        mPs.mDensity = std::vector<float>(mPs.mPositions.size(), Para::density0);
         mPs.mPressure = std::vector<float>(mPs.mPositions.size(), 0.0f);
         for (int i = 0; i < mPs.mPositions.size(); i++) {    // 对所有粒子
             if (mPs.mNeighbors.size() != 0) {    // 有邻居
@@ -36,28 +36,18 @@ namespace Fluid2d {
                 for (auto& nInfo : neighbors) {
                     density += mW.Value(nInfo.distance);
                 }
-                density *= (mPs.mVolume * Glb::density0);
+                density *= (mPs.mVolume * Para::density0);
                 mPs.mDensity[i] = density;
-                mPs.mDensity[i] = std::max(density, Glb::density0);        // 禁止膨胀
+                mPs.mDensity[i] = std::max(density, Para::density0);        // 禁止膨胀
             }
             // 更新压强
-            mPs.mPressure[i] = mPs.mStiffness* (std::powf(mPs.mDensity[i] / Glb::density0, mPs.mExponent) - 1.0f);
+            mPs.mPressure[i] = mPs.mStiffness* (std::powf(mPs.mDensity[i] / Para::density0, mPs.mExponent) - 1.0f);
         }
-        //int p = 0;
-        //for (int i = 0; i < 60; i++) {
-        //    for (int j = 0; j < 60; j++) {
-        //        std::cout << mPs.mDensity[p] << " ";
-        //        p++;
-        //    }
-        //    std::cout << std::endl;
-        //}
     }
 
     void Solver::InitAccleration() {
-        std::fill(mPs.mAccleration.begin() + mPs.mStartIndex, mPs.mAccleration.end(), glm::vec2(0.0f, -Glb::gravity));
-        //mPs.mAccleration = std::vector<glm::vec2>(mPs.mPositions.size(), glm::vec2(0.0f, -Glb::gravity));
+        std::fill(mPs.mAccleration.begin() + mPs.mStartIndex, mPs.mAccleration.end(), glm::vec2(0.0f, -Para::gravity));
     }
-
 
     void Solver::UpdateViscosityAccleration() {
         float dim = 2.0f;
@@ -77,15 +67,6 @@ namespace Fluid2d {
                 mPs.mAccleration[i] += viscosityForce;
             }
         }
-
-        //int p = 0;
-        //for (int i = 0; i < 60; i++) {
-        //    for (int j = 0; j < 60; j++) {
-        //        std::cout << "(" << mPs.mAccleration[p].x << "," << mPs.mAccleration[p].y << ") ";
-        //        p++;
-        //    }
-        //    std::cout << std::endl;
-        //}
     }
 
     void Solver::UpdatePressureAccleration() {
@@ -105,27 +86,13 @@ namespace Fluid2d {
                 mPs.mAccleration[i] -= pressureForce * mPs.mVolume;
             }
         }
-
-        //int p = 0;
-        //float mx = 0;
-        //float my = 0;
-        //for (int i = 0; i < 60; i++) {
-        //    for (int j = 0; j < 60; j++) {
-        //        mx = std::max(mx, abs(mPs.mAccleration[p].x));
-        //        my = std::max(my, abs(mPs.mAccleration[p].y));
-        //        std::cout << "(" << mPs.mAccleration[p].x << "," << mPs.mAccleration[p].y << ") ";
-        //        p++;
-        //    }
-        //    std::cout << std::endl;
-        //}
-        //std::cout << mx << " " << my << "...."  << std::endl;
     }
 
     void Solver::EulerIntegrate() {
         for (int i = mPs.mStartIndex; i < mPs.mPositions.size(); i++) {    // 对所有粒子
-            mPs.mVelocity[i] += Glb::dt * mPs.mAccleration[i];
+            mPs.mVelocity[i] += Para::dt * mPs.mAccleration[i];
             mPs.mVelocity[i] = glm::clamp(mPs.mVelocity[i], glm::vec2(-100.0f), glm::vec2(100.0f));
-            mPs.mPositions[i] += Glb::dt * mPs.mVelocity[i];
+            mPs.mPositions[i] += Para::dt * mPs.mVelocity[i];
         }
     }
 
@@ -154,7 +121,7 @@ namespace Fluid2d {
             }
 
             if (invFlag) {
-                mPs.mPositions[i] += Glb::dt * mPs.mVelocity[i];
+                mPs.mPositions[i] += Para::dt * mPs.mVelocity[i];
                 mPs.mVelocity[i] = glm::clamp(mPs.mVelocity[i], glm::vec2(-100.0f), glm::vec2(100.0f));    // 速度限制
             }
         }

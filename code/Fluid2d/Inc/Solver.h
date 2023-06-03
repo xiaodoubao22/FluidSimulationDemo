@@ -2,7 +2,7 @@
 #define SOLVER_H
 
 #include "ParticalSystem.h"
-#include "WCubicSpline2d.h"
+#include "WCubicSpline.h"
 
 namespace Fluid2d {
 
@@ -28,7 +28,7 @@ namespace Fluid2d {
 
     private:
         ParticalSystem& mPs;
-        WCubicSpline2d mW;
+        Glb::WCubicSpline2d mW;
 
     };
 

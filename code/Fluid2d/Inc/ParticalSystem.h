@@ -5,6 +5,7 @@
 #include <list>
 #include <glm/glm.hpp>
 #include "Global.h"
+#include "Parameters.h"
 
 namespace Fluid2d {
 
@@ -40,7 +41,7 @@ namespace Fluid2d {
         float mParticalRadius = 0.005;   // 粒子半径
         float mParticalDiameter = 2.0 * mParticalRadius;
         float mVolume = 0.8 * mParticalDiameter * mParticalDiameter;    // 体积
-        float mMass = Glb::density0 * mVolume;  // 质量
+        float mMass = Para::density0 * mVolume;  // 质量
         float mViscosity = 0.01;            // 粘度系数
         float mExponent = 7.0f;              // 压力指数
         int mStiffness = 50.0f;            // 刚度

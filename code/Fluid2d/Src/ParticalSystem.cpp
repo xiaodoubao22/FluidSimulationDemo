@@ -22,7 +22,6 @@ namespace Fluid2d {
         mBlockColNum = floor(size.x / mSupportRadius);
         mBlockSize = glm::vec2(size.x / mBlockColNum, size.y / mBlockRowNum);
 
-
         mPositions.clear();
         mVelocity.clear();
         mAccleration.clear();
@@ -68,7 +67,6 @@ namespace Fluid2d {
         mVelocity.insert(mVelocity.end(), velocity.begin(), velocity.end());
         mAccleration.insert(mAccleration.end(), accleration.begin(), accleration.end());
         return position.size();
-
     }
 
     void ParticalSystem::SearchNeighbors() {
@@ -76,7 +74,7 @@ namespace Fluid2d {
         timer.Start();
         // ·Ö¿é
         BuildBlockStructure();
-        std::cout << "block time = " << timer.GetTime() << std::endl;
+        //std::cout << "block time = " << timer.GetTime() << std::endl;
 
         timer.Start();
         mNeighbors = std::vector<std::vector<NeighborInfo>>(mPositions.size(), std::vector<NeighborInfo>(0));
@@ -114,7 +112,7 @@ namespace Fluid2d {
                 }
             }
         }
-        std::cout << "fn time = " << timer.GetTime() << std::endl;
+        //std::cout << "fn time = " << timer.GetTime() << std::endl;
         //int p = 0;
         //for (int i = 0; i < 60; i++) {
         //    for (int j = 0; j < 60; j++) {
@@ -176,7 +174,6 @@ namespace Fluid2d {
                 float x = colOffset + j * space;
                 float y = rowOffset + i * space;
                 position[p] = corner + glm::vec2(x, y);
-                
                 p++;
             }
         }

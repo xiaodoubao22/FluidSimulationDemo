@@ -1,0 +1,28 @@
+#version 450 core
+
+layout (local_size_x = 10, local_size_y = 10, local_size_z = 1) in;
+
+layout(rgba32f, binding = 0) uniform image2D imgOutput;
+
+void main() {
+    
+    ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
+
+    vec4 value = imageLoad(imgOutput, texelCoord);
+    value.x += 0.001;
+    if (value.x > 1.0) {
+        value.x = 0.0;
+    }
+    value.y += 0.001;
+    if (value.y > 1.0) {
+        value.y = 0.0;
+    }
+    value.z += 0.001;
+    if (value.z > 1.0) {
+        value.z = 0.0;
+    }
+    value.w = 1.0;
+
+    imageStore(imgOutput, texelCoord, value);
+}
+

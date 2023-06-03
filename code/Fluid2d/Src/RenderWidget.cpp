@@ -20,20 +20,20 @@ int32_t RenderWidget::Init() {
     // 初始化shader
     std::string particalVertShaderPath = "../code/Fluid2d/Shaders/DrawParticals.vert";
     std::string particalFragShaderPath = "../code/Fluid2d/Shaders/DrawParticals.frag";
-    mParticalShader = new Shader();
-    mParticalShader->BuildFromFile(particalVertShaderPath, std::string(""), particalFragShaderPath);
+    mParticalShader = new Glb::Shader();
+    mParticalShader->BuildFromFile(particalVertShaderPath, particalFragShaderPath);
 
     std::string ballVertShaderPath = "../code/Fluid2d/Shaders/DrawSdf.vert";
     std::string ballGeomShaderPath = "../code/Fluid2d/Shaders/DrawSdf.geom";
     std::string ballFragShaderPath = "../code/Fluid2d/Shaders/DrawSdf.frag";
-    mSdfShader = new Shader();
-    mSdfShader->BuildFromFile(ballVertShaderPath, ballGeomShaderPath, ballFragShaderPath);
+    mSdfShader = new Glb::Shader();
+    mSdfShader->BuildFromFile(ballVertShaderPath, ballFragShaderPath, ballGeomShaderPath);
 
     std::string milkVertShaderPath = "../code/Fluid2d/Shaders/DrawMilk.vert";
     std::string milkFragShaderPath = "../code/Fluid2d/Shaders/DrawMilk.frag";
-    mMilkShader = new Shader();
-    mMilkShader->BuildFromFile(milkVertShaderPath, std::string(""), milkFragShaderPath);
-    glUniform1i(glGetUniformLocation(mMilkShader->mId, "textureSdf"), 0);
+    mMilkShader = new Glb::Shader();
+    mMilkShader->BuildFromFile(milkVertShaderPath, milkFragShaderPath);
+    glUniform1i(glGetUniformLocation(mMilkShader->GetId(), "textureSdf"), 0);
     
     // 生成vao
     glGenVertexArrays(1, &mVaoParticals);

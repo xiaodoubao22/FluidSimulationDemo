@@ -1,17 +1,9 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 #include <chrono>
+#include <random>
 
 namespace Glb {
-    const float gravity = 9.8f;
-    const float density0 = 1000.0f;
-    const float stiffness = 50.0f;
-    const float exponent = 7.0f;
-    const float viscosity = 0.05f;
-    const float dt = 2e-4;
-    const int substep = 4;
-
-
     class Timer {
     private:
         std::chrono::system_clock::time_point mStartPoint;
@@ -25,6 +17,19 @@ namespace Glb {
             return std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
         }
     };
+
+
+    class RandomGenerator {
+    private:
+        std::random_device dev;
+    public:
+        float GetUniformRandom(float min = 0.0f, float max = 1.0f) {
+            std::mt19937 rng(dev());
+            std::uniform_real_distribution<float> dist(min, max); // distribution in range [min, max]
+            return dist(rng);
+        }
+    };
+
 }
 
 

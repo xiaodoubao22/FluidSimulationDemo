@@ -1,0 +1,174 @@
+#version 450 core
+// ----------consts----------
+const float gGravity = 9.8;
+const float gDeltaT = 4e-4;
+const float supportRadius = 0.025;
+
+//  ----------uniform----------
+uniform uint pass;
+uniform uint gLocalSize;
+
+uniform uvec3 blockNum;
+uniform vec3 blockSize;
+uniform vec3 containerLowerBound;
+uniform vec3 containerUpperBound;
+uniform int blockIdOffs[27];
+
+uniform vec3 gGravityDir;
+uniform highp float gDensity0;
+uniform highp float gVolume;
+uniform highp float gMass;
+uniform highp float gStiffness;
+uniform highp float gExponent;
+uniform highp float gViscosity;
+
+uniform sampler1D kernelBuffer;
+
+// local size
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+// ----------structs----------
+struct ParticalInfo3d {
+    vec3 position;
+    vec3 velosity;
+    vec3 accleration;
+    highp float density;
+    highp float pressure;
+    highp float pressDivDens2;
+    highp uint blockId;
+};
+
+// ----------buffers----------
+layout(std140, binding=4) buffer ParticalInfos
+{
+    ParticalInfo3d particals[];
+};
+
+layout(binding=5) buffer BlockExtens
+{
+    uvec2 blockExtens[];
+};
+
+layout(rgba32f, binding = 0) uniform image2D imgOutput;
+
+// ----------functions----------
+void EulerIntegration(inout ParticalInfo3d pi) {
+    pi.velosity = pi.velosity + gDeltaT * pi.accleration;
+    pi.velosity = clamp(pi.velosity, vec3(-100.0), vec3(100.0));    // 速度限制
+    pi.position = pi.position + gDeltaT * pi.velosity;
+}
+
+void ComputeDensityAndPress(inout ParticalInfo3d pi) {
+    uint particalId = gl_GlobalInvocationID.x;
+
+    for (int i = 0; i < blockIdOffs.length(); i++) {     // for all neighbor block
+        uint bIdj = pi.blockId + blockIdOffs[i];
+        for(uint j = blockExtens[bIdj].x; j < blockExtens[bIdj].y; j++) {   // for all neighbor particals
+            vec3 radiusIj = pi.position - particals[j].position;
+            float diatanceIj = length(radiusIj);
+            if (particalId != j && diatanceIj <= supportRadius) {
+                pi.density += texture(kernelBuffer, diatanceIj / supportRadius).r;
+            }
+        }
+    }
+    pi.density *= (gVolume * gDensity0);
+    pi.density = max(pi.density, gDensity0);
+    pi.pressure = gStiffness * (pow(pi.density / gDensity0, gExponent) - 1.0);
+    pi.pressDivDens2 = pi.pressure / pow(pi.density, 2);
+}
+
+void ComputeAccleration(inout ParticalInfo3d pi) {
+    uint particalId = gl_GlobalInvocationID.x;
+
+    float dim = 3.0;
+    float constFactor = 2.0 * (dim + 2.0) * gViscosity;
+    vec3 viscosityForce = vec3(0.0);
+    vec3 pressureForce = vec3(0.0);
+    for (int i = 0; i < blockIdOffs.length(); i++) {     // for all neighbor block
+        uint bIdj = pi.blockId + blockIdOffs[i];
+        for(uint j = blockExtens[bIdj].x; j < blockExtens[bIdj].y; j++) {   // for all neighbor particals
+            vec3 radiusIj = pi.position - particals[j].position;
+            float diatanceIj = length(radiusIj);
+            if (particalId != j && diatanceIj <= supportRadius) {
+                float dotDvToRad = dot(pi.velosity - particals[j].velosity, radiusIj);
+                float denom = diatanceIj * diatanceIj + 0.01 * supportRadius * supportRadius;
+                vec3 wGrad = texture(kernelBuffer, diatanceIj / supportRadius).g * radiusIj;
+                viscosityForce += (gMass / particals[j].density) * dotDvToRad * wGrad / denom;
+                pressureForce += particals[j].density * (pi.pressDivDens2 + particals[j].pressDivDens2) * wGrad;
+            }
+        }
+    }
+    pi.accleration += viscosityForce * constFactor;
+    pi.accleration -= pressureForce * gVolume;
+}
+
+void BoundaryCondition(inout ParticalInfo3d pi) {
+    bool invFlag = false; 
+
+    if (pi.position.x < containerLowerBound.x + supportRadius) {
+        pi.velosity.x = abs(pi.velosity.x);
+        invFlag = true;
+    }
+
+    if (pi.position.y < containerLowerBound.y + supportRadius) {
+        pi.velosity.y = abs(pi.velosity.y);
+        invFlag = true;
+    }
+
+    if (pi.position.z < containerLowerBound.z + supportRadius) {
+        pi.velosity.z = abs(pi.velosity.z);
+        invFlag = true;
+    }
+
+    if (pi.position.x > containerUpperBound.x - supportRadius) {
+        pi.velosity.x = -abs(pi.velosity.x);
+        invFlag = true;
+    }
+
+    if (pi.position.y > containerUpperBound.y - supportRadius) {
+        pi.velosity.y = -abs(pi.velosity.y);
+        invFlag = true;
+    }
+
+    if (pi.position.z > containerUpperBound.z - supportRadius) {
+        pi.velosity.z = -abs(pi.velosity.z);
+        invFlag = true;
+    }
+
+    if (invFlag) {
+        pi.velosity *= 0.9;
+    }
+
+    pi.position = clamp(pi.position, containerLowerBound + vec3(supportRadius), containerUpperBound - vec3(supportRadius));
+    pi.velosity = clamp(pi.velosity, vec3(-100.0), vec3(100.0));    // 速度限制
+}
+
+void CalculateBlockId(inout ParticalInfo3d pi) {
+    vec3 deltePos = pi.position - containerLowerBound;
+    uvec3 blockPosition = uvec3(floor(deltePos / blockSize));
+	pi.blockId = blockPosition.z * blockNum.x * blockNum.y + blockPosition.y * blockNum.x + blockPosition.x;
+}
+
+
+// ----------main----------
+void main() {
+    uint particalId = gl_GlobalInvocationID.x;
+    uint test[100];
+    for(int i = 0; i < 100; i++) {
+        test[i] = 360*i;
+    }
+
+    if (pass == 0) {
+        ComputeDensityAndPress(particals[particalId]);
+    }
+    else if (pass == 1) {
+        particals[particalId].accleration = gGravity * gGravityDir;
+        ComputeAccleration(particals[particalId]);
+        EulerIntegration(particals[particalId]);
+        BoundaryCondition(particals[particalId]);
+        CalculateBlockId(particals[particalId]);
+    }
+    
+    return;
+}
+
