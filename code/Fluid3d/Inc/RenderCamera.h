@@ -16,6 +16,8 @@ namespace Fluid3d {
         glm::mat4 GetView();
         glm::mat4 GetProjection();
         glm::vec3 GetUp();
+        glm::vec3 GetRight();
+        glm::vec3 GetFront();
 
     private:
         void UpdateView();
@@ -31,7 +33,7 @@ namespace Fluid3d {
 
         glm::vec3 mPosition;
         glm::vec3 mTargetPoint;
-        float mTargetDistance = 0.5f;
+        float mTargetDistance;
         glm::vec3 mRight;
         glm::vec3 mUp;
         glm::vec3 mFront;

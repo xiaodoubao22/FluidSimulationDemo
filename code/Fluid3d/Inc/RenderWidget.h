@@ -1,7 +1,6 @@
 #ifndef RENDER_WIDGET_H
 #define RENDER_WIDGET_H
 
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -12,6 +11,9 @@
 #include "ComputeShader.h"
 #include "ParticalSystem3d.h"
 #include "RenderCamera.h"
+#include "SkyBox.h"
+#include "BilateralFilter.h"
+#include "Material.h"
 
 namespace Fluid3d {
     class RenderWidget
@@ -46,10 +48,13 @@ namespace Fluid3d {
         bool CreateWindow();
         void UpdateFPS();
         void BuildShaders();
+        void InitFilters();
+        void GenerateFrameBuffers();
         void GenerateBuffers();
         void GenerateTextures();
-        void MakeVaoParticals();
-        void MakeVaoCoord();
+        void LoadSkyBox();
+        void LoadMaterials();
+        void MakeVertexArrays();
         void DrawParticals();
         int32_t Destroy();
 
@@ -70,26 +75,54 @@ namespace Fluid3d {
         // shaders
         Glb::Shader* mScreenQuad = nullptr;
         Glb::Shader* mDrawColor3d = nullptr;
-        Glb::ComputeShader* mComputeShader = nullptr;
+        Glb::ComputeShader* mComputeParticals = nullptr;
+        Glb::Shader* mPointSpriteZValue = nullptr;
+        Glb::Shader* mPointSpriteThickness = nullptr;
+        Glb::ComputeShader* mComputeNormal = nullptr;
+        Glb::ComputeShader* mBlurZ = nullptr;
+        Glb::Shader* mDrawFluidColor = nullptr;
+        Glb::Shader* mDrawModel = nullptr;
+
+        // fbo
+        GLuint mFboDepth = 0;
+        GLuint mTexZBuffer = 0;
+        GLuint mRboDepthBuffer = 0;
+
+        GLuint mFboThickness = 0;
+        GLuint mTexThicknessBuffer = 0;
 
         // vao
         GLuint mVaoNull = 0;
         GLuint mVaoParticals = 0;
         GLuint mVaoCoord = 0;
+        GLuint mVaoFloor = 0;
 
         // buffers
         GLuint mCoordVertBuffer = 0;
         GLuint mBufferParticals = 0;
         GLuint mBufferBlocks = 0;
+        GLuint mBufferKernelIndexs5x5 = 0;
+        GLuint mBufferKernelIndexs9x9 = 0;
+        GLuint mBufferFloor = 0;
 
         // texures
         GLuint mTestTexture = 0;
         GLuint mTexKernelBuffer = 0;
+        GLuint mTexZBlurTempBuffer = 0;
+        GLuint mTexDepthFilter = 0;
+
+        // SkyBox
+        Glb::SkyBox* mSkyBox = nullptr;
+
+        // Materials
+        Material* mSlabWhite = nullptr;
 
         int mParticalNum = 0;
         float mUpdateTime = 0.0f;
         float updateTitleTime = 0.0f;
         float frameCount = 0.0f;
+
+        BilaterialFilter* mDepthFilter;
     };
 }
 

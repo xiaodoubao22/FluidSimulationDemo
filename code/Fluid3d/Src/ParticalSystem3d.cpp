@@ -12,8 +12,8 @@ namespace Fluid3d {
 	}
 
 	void ParticalSystem3D::SetContainerSize(glm::vec3 corner, glm::vec3 size) {
-		mLowerBound = corner - mSupportRadius;
-		mUpperBound = corner + size + mSupportRadius;
+		mLowerBound = corner - mSupportRadius + mParticalDiameter;
+		mUpperBound = corner + size + mSupportRadius - mParticalDiameter;
 		mContainerCenter = (mLowerBound + mUpperBound) / 2.0f;
 		size = mUpperBound - mLowerBound;
 

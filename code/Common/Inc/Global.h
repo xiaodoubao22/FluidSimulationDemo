@@ -4,6 +4,8 @@
 #include <random>
 
 namespace Glb {
+    const float_t EPS = 1e-5;
+
     class Timer {
     private:
         std::chrono::system_clock::time_point mStartPoint;

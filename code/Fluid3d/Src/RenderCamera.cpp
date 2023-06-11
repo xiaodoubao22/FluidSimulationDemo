@@ -3,11 +3,12 @@
 
 namespace Fluid3d {
 	RenderCamera::RenderCamera() {
-        mYaw = 0.0f;
-        mPitch = 30.0f;
+        mYaw = 45.0f;
+        mPitch = 20.0f;
 
         mWorldUp = glm::vec3(0.0, 0.0, 1.0);
-        mTargetPoint = glm::vec3(0.15, 0.15, 0.1);
+        mTargetPoint = glm::vec3(0.2, 0.2, 0.1);
+        mTargetDistance = 0.7f;
         UpdateView();
 
         float aspect = 1.0f;
@@ -52,6 +53,14 @@ namespace Fluid3d {
 
     glm::vec3 RenderCamera::GetUp() {
         return mUp;
+    }
+
+    glm::vec3 RenderCamera::GetRight() {
+        return mRight;
+    }
+
+    glm::vec3 RenderCamera::GetFront() {
+        return mFront;
     }
 
     void RenderCamera::UpdateView() {

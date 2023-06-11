@@ -1,0 +1,50 @@
+#version 450 core
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+layout(r32f, binding = 0) uniform image2D inputImage;
+layout(r32f, binding = 1) uniform image2D outputImage;
+
+uniform sampler2D weightBuffer;
+
+layout(std430, binding=0) buffer Indexs
+{
+    ivec2 indexes[];
+};
+
+uniform int filterInterval;
+uniform int indexesSize;
+uniform float sigma1;
+uniform float sigma2;
+
+
+float Weight(float d1, float d2) {
+    vec2 texCoord = vec2(d1 / (3.0 * sigma1), d2 / (3.0 * sigma2));
+    return texture(weightBuffer, texCoord).r;
+}
+
+void main() {
+    ivec2 curPixelId = ivec2(gl_GlobalInvocationID.xy);
+    vec4 originDepth = imageLoad(inputImage, curPixelId);
+    if (originDepth.r > 0.0) {
+        imageStore(outputImage, curPixelId, vec4(1.0, 0.0, 0.0, 0.0));
+        return;
+    }
+    
+    highp float blureDepth = 0.0;
+    highp float weightSum = 0.0;
+
+    for(int i = 0; i < indexesSize; i++){
+        ivec2 index = indexes[i] * filterInterval;
+        vec4 sampleColor = imageLoad(inputImage, curPixelId + index);
+        if(sampleColor.r < 0.0) {
+            float w = Weight(length(index), abs(originDepth.r - sampleColor.r));
+            blureDepth += w * sampleColor.r;
+            weightSum += w;
+        }
+    }
+
+    blureDepth /= weightSum;
+
+    imageStore(outputImage, curPixelId, vec4(blureDepth, 0.0, 0.0, 0.0));
+    return;
+}

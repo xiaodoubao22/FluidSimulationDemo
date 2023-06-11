@@ -2,4 +2,8 @@ build/
 third_party/
 !third_party/README.md
 
+resources/
+!resources/skybox
+!resources/SlabWhite
+
 

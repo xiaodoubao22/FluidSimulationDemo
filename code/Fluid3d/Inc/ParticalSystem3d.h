@@ -18,6 +18,12 @@ namespace Fluid3d {
 		alignas(4) uint32_t blockId;
 	};
 
+	struct NeighborInfo {
+		alignas(16) glm::vec3 radius;
+		alignas(4) float_t distance;
+		alignas(4) int32_t neighborId;
+	};
+
 	class ParticalSystem3D {
 	public:
 		ParticalSystem3D();
@@ -39,6 +45,7 @@ namespace Fluid3d {
 		float mExponent = Para3d::exponent;              // 压力指数
 		int mStiffness = Para3d::stiffness;            // 刚度
 		std::vector<ParticalInfo3d> mParticalInfos;
+		int mMaxNeighbors = 512;
 
 		// 容器参数
 		glm::vec3 mLowerBound = glm::vec3(FLT_MAX);

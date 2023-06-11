@@ -8,6 +8,7 @@ set(THIRD_PARTY ${CMAKE_SOURCE_DIR}/../third_party)
 set(GLAD_DIR ${THIRD_PARTY}/glad/include)
 set(GLM_DIR ${THIRD_PARTY}/glm-master)
 set(GLFW_DIR ${THIRD_PARTY}/glfw-3.3.8-x64-build/include)
+set(STB_DIR ${THIRD_PARTY}/stb)
 
 # [common]设置头文件路径
 set(COMMON_INC_DIR ${CMAKE_SOURCE_DIR}/Common/Inc)
@@ -16,6 +17,7 @@ set(COMMON_INC_FILES
     ${COMMON_INC_DIR}/Shader.h
     ${COMMON_INC_DIR}/WCubicSpline.h
     ${COMMON_INC_DIR}/Global.h
+    
     )
 # [common]设置源文件路径
 set(COMMON_SRC_DIR ${CMAKE_SOURCE_DIR}/Common/Src)
@@ -56,32 +58,50 @@ set(FLUID_2D_SHADER_FILES
 # [Fluid3d]设置头文件路径
 set(FLUID_3D_INC_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Inc)
 set(FLUID_3D_INC_FILES
+    ${FLUID_3D_INC_DIR}/BilateralFilter.h
+    ${FLUID_3D_INC_DIR}/Material.h
     ${FLUID_3D_INC_DIR}/Parameters3d.h
     ${FLUID_3D_INC_DIR}/ParticalSystem3d.h
     ${FLUID_3D_INC_DIR}/RenderCamera.h
     ${FLUID_3D_INC_DIR}/RenderWidget.h
+    ${FLUID_3D_INC_DIR}/SkyBox.h
     )
 # [Fluid3d]设置源文件路径
 set(FLUID_3D_SRC_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Src)
 set(FLUID_3D_SRC_FILES
+    ${FLUID_3D_SRC_DIR}/BilateralFilter.cpp
+    ${FLUID_3D_SRC_DIR}/Material.cpp
     ${FLUID_3D_SRC_DIR}/ParticalSystem3d.cpp
     ${FLUID_3D_SRC_DIR}/RenderCamera.cpp
     ${FLUID_3D_SRC_DIR}/RenderWidget.cpp
+    ${FLUID_3D_SRC_DIR}/SkyBox.cpp
     ${CMAKE_SOURCE_DIR}/Fluid3d/Main3d.cpp
     )
 # [Fluid3d]设置Shader路径
 set(FLUID_3D_SHADER_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Shaders)
 set(FLUID_3D_SHADER_FILES
+    ${FLUID_3D_SHADER_DIR}/BlurZ.comp
+    ${FLUID_3D_SHADER_DIR}/ComputeNormal.comp
     ${FLUID_3D_SHADER_DIR}/ComputeParticals.comp
     ${FLUID_3D_SHADER_DIR}/DrawColor3d.frag
     ${FLUID_3D_SHADER_DIR}/DrawColor3d.vert
+    ${FLUID_3D_SHADER_DIR}/DrawFluidColor.frag
+    ${FLUID_3D_SHADER_DIR}/DrawFluidColor.vert
+    ${FLUID_3D_SHADER_DIR}/DrawModel.frag
+    ${FLUID_3D_SHADER_DIR}/DrawModel.vert
+    ${FLUID_3D_SHADER_DIR}/PointSprite.geom
+    ${FLUID_3D_SHADER_DIR}/PointSprite.vert
+    ${FLUID_3D_SHADER_DIR}/PointSpriteThickness.frag
+    ${FLUID_3D_SHADER_DIR}/PointSpriteZValue.frag
     ${FLUID_3D_SHADER_DIR}/ScreenQuad.frag
     ${FLUID_3D_SHADER_DIR}/ScreenQuad.vert
+    ${FLUID_3D_SHADER_DIR}/SkyBox.frag
+    ${FLUID_3D_SHADER_DIR}/SkyBox.vert
     ${FLUID_3D_SHADER_DIR}/TestCompute.comp
     )
 
 # 全局包含目录
-include_directories(${GLAD_DIR} ${GLM_DIR} ${GLFW_DIR} ${COMMON_INC_DIR})
+include_directories(${GLAD_DIR} ${GLM_DIR} ${GLFW_DIR} ${STB_DIR} ${COMMON_INC_DIR})
 
 # -----------2D项目-----------
 set(PROJECT_2D FluidSimulation2D)
@@ -103,8 +123,6 @@ target_link_libraries(${PROJECT_2D}
 
 # -----------3D项目-----------
 set(PROJECT_3D FluidSimulation3D)
-# 包含目录
-include_directories(${GLAD_DIR} ${GLM_DIR} ${GLFW_DIR})
 # 生成exe
 add_executable(${PROJECT_3D} 
     ${COMMON_INC_FILES} 
