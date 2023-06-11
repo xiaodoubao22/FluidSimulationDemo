@@ -8,12 +8,13 @@
 
 ### 3D模拟
 
+<img src="./figure/3dWater.gif" width="400">
 <img src="./figure/3dFluid.gif" width="400">
 
 ### 2D模拟及牛奶效果渲染
 
-<img src="./figure/2d.gif" width="400">
 <img src="./figure/milk.gif" width="400">
+<img src="./figure/2d.gif" width="400">
 
 ## 三方库
 

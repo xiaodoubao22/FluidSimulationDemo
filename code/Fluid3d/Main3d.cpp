@@ -12,7 +12,7 @@ int main() {
 
     Fluid3d::ParticalSystem3D ps;
     ps.SetContainerSize(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.5, 0.5, 0.5));
-    ps.AddFluidBlock(glm::vec3(0.1, 0.1, 0.25), glm::vec3(0.2, 0.2, 0.15), glm::vec3(-1.0, -1.0, -3.0), 0.01 * 0.7);
+    ps.AddFluidBlock(glm::vec3(0.1, 0.1, 0.25), glm::vec3(0.2, 0.2, 0.13), glm::vec3(-1.0, -1.0, -3.0), 0.01 * 0.7);
     //ps.AddFluidBlock(glm::vec3(0.0, 0.2, 0.15), glm::vec3(0.15, 0.15, 0.2), glm::vec3(0.0, -1.0, -1.0), 0.01 * 0.85);
     //ps.AddFluidBlock(glm::vec3(0.1, 0.0, 0.05), glm::vec3(0.1, 0.1, 0.3), glm::vec3(-1.0, 1.0, -0.5), 0.01 * 0.85);
     ps.UpdateData();

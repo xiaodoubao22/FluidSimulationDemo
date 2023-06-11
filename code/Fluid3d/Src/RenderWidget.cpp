@@ -107,8 +107,8 @@ namespace Fluid3d {
             glBindTexture(GL_TEXTURE_1D, mTexKernelBuffer);
             glBindImageTexture(0, mTestTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
             mComputeParticals->Use();
-            mComputeParticals->SetVec3("gGravityDir", -mCamera.GetUp());
-            //mComputeParticals->SetVec3("gGravityDir", glm::vec3(0.0, 0.0, -1.0));
+            //mComputeParticals->SetVec3("gGravityDir", -mCamera.GetUp());
+            mComputeParticals->SetVec3("gGravityDir", glm::vec3(0.0, 0.0, -1.0));
             for (int pass = 0; pass <= 1; pass++) {
                 mComputeParticals->SetUInt("pass", pass);
                 glDispatchCompute(mParticalNum, 1, 1);
