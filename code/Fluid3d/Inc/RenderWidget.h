@@ -12,8 +12,9 @@
 #include "ParticalSystem3d.h"
 #include "RenderCamera.h"
 #include "SkyBox.h"
-#include "BilateralFilter.h"
+#include "DepthFilter.h"
 #include "Material.h"
+#include "ShadowMap.h"
 
 namespace Fluid3d {
     class RenderWidget
@@ -53,7 +54,7 @@ namespace Fluid3d {
         void GenerateBuffers();
         void GenerateTextures();
         void LoadSkyBox();
-        void LoadMaterials();
+        void CreateRenderAssets();
         void MakeVertexArrays();
         void DrawParticals();
         int32_t Destroy();
@@ -78,8 +79,6 @@ namespace Fluid3d {
         Glb::ComputeShader* mComputeParticals = nullptr;
         Glb::Shader* mPointSpriteZValue = nullptr;
         Glb::Shader* mPointSpriteThickness = nullptr;
-        Glb::ComputeShader* mComputeNormal = nullptr;
-        Glb::ComputeShader* mBlurZ = nullptr;
         Glb::Shader* mDrawFluidColor = nullptr;
         Glb::Shader* mDrawModel = nullptr;
 
@@ -101,28 +100,31 @@ namespace Fluid3d {
         GLuint mCoordVertBuffer = 0;
         GLuint mBufferParticals = 0;
         GLuint mBufferBlocks = 0;
-        GLuint mBufferKernelIndexs5x5 = 0;
-        GLuint mBufferKernelIndexs9x9 = 0;
         GLuint mBufferFloor = 0;
 
         // texures
         GLuint mTestTexture = 0;
         GLuint mTexKernelBuffer = 0;
         GLuint mTexZBlurTempBuffer = 0;
-        GLuint mTexDepthFilter = 0;
+        
 
         // SkyBox
-        Glb::SkyBox* mSkyBox = nullptr;
+        SkyBox* mSkyBox = nullptr;
 
         // Materials
         Material* mSlabWhite = nullptr;
 
-        int mParticalNum = 0;
-        float mUpdateTime = 0.0f;
-        float updateTitleTime = 0.0f;
-        float frameCount = 0.0f;
+        // time statistics
+        int32_t mParticalNum = 0;
+        float_t mUpdateTime = 0.0f;
+        float_t updateTitleTime = 0.0f;
+        float_t frameCount = 0.0f;
 
-        BilaterialFilter* mDepthFilter;
+        // shadow map
+        PointLight mLight;
+        FluidShadowMap* mShadowMap;
+
+        DepthFilter* mDepthFilter;
     };
 }
 

@@ -1,9 +1,6 @@
 #version 450
 
 uniform float particalRadius;
-uniform vec3 cameraFront;
-uniform mat4 view;
-uniform mat4 projection;
 
 in vec3 particalCenter;
 in vec3 fragPosition;

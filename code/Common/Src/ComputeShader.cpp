@@ -4,8 +4,8 @@
 #include <iostream>
 
 namespace Glb {
-	ComputeShader::ComputeShader() {
-
+	ComputeShader::ComputeShader(std::string name) {
+        mName = name;
 	}
 
 	ComputeShader::~ComputeShader() {
@@ -19,7 +19,7 @@ namespace Glb {
         // ∂¡»° compute shader
         shaderFile.open(compPath);
         if (!shaderFile) {
-            std::cout << "ERROR: Compute shader file open failed" << std::endl;
+            std::cout << "ERROR: Compute shader file open failed name:" << mName <<  std::endl;
             return -1;
         }
         shaderStream << shaderFile.rdbuf();
@@ -39,7 +39,7 @@ namespace Glb {
         if (!success)
         {
             glGetShaderInfoLog(computeShader, 1024, NULL, infoLog);
-            std::cout << "ERROR::CONPUTE_SHADER_COMPILATION_ERROR: " << "\n" << infoLog << std::endl;
+            std::cout << "ERROR::CONPUTE_SHADER_COMPILATION_ERROR name:" << mName << "\n" << infoLog << std::endl;
             return -1;
         }
 
@@ -53,12 +53,12 @@ namespace Glb {
         if (!success)
         {
             glGetProgramInfoLog(mId, 1024, NULL, infoLog);
-            std::cout << "ERROR::PROGRAM_LINKING_ERROR:" << "\n" << infoLog << std::endl;
+            std::cout << "ERROR::PROGRAM_LINKING_ERROR mName:" << mName << "\n" << infoLog << std::endl;
             return -1;
         }
         // delete the shaders
         glDeleteShader(computeShader);
-        std::cout << "compute shader success" << std::endl;
+        std::cout << "compute shader success mName:" << mName << std::endl;
 
         return 0;
 	}
@@ -72,7 +72,7 @@ namespace Glb {
             // ∂¡»° compute shader
             shaderFile.open(compPaths[i]);
             if (!shaderFile) {
-                std::cout << "error: Compute shader file " << i << " open failed" << std::endl;
+                std::cout << "error: Compute shader file " << i << " open failed mName:" << mName << std::endl;
                 return -1;
             }
             shaderStream << shaderFile.rdbuf();
@@ -91,7 +91,7 @@ namespace Glb {
             if (!success)
             {
                 glGetShaderInfoLog(computeShaders[i], 1024, NULL, infoLog);
-                std::cout << "error: compute shader" << i << "compile error: " << "\n" << infoLog << std::endl;
+                std::cout << "error: compute shader" << i << "compile error mName:" << mName << "\n" << infoLog << std::endl;
                 return -1;
             }
         }
@@ -110,14 +110,14 @@ namespace Glb {
         if (!success)
         {
             glGetProgramInfoLog(mId, 1024, NULL, infoLog);
-            std::cout << "ERROR::PROGRAM_LINKING_ERROR:" << "\n" << infoLog << std::endl;
+            std::cout << "ERROR::PROGRAM_LINKING_ERROR mName:" << mName << "\n" << infoLog << std::endl;
             return -1;
         }
         // delete the shaders
         for (int i = 0; i < computeShaders.size(); i++) {
             glDeleteShader(computeShaders[i]);
         }
-        std::cout << "compute shader build files success" << std::endl;
+        std::cout << "compute shader build files success mName:" << mName << std::endl;
     }
 
 	void ComputeShader::Use() {

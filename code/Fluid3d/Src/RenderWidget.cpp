@@ -50,7 +50,7 @@ namespace Fluid3d {
 
         InitFilters();
         LoadSkyBox();
-        LoadMaterials();
+        CreateRenderAssets();
         MakeVertexArrays(); // 生成画粒子的vao
 
         glGenVertexArrays(1, &mVaoNull);
@@ -109,9 +109,10 @@ namespace Fluid3d {
             mComputeParticals->Use();
             //mComputeParticals->SetVec3("gGravityDir", -mCamera.GetUp());
             mComputeParticals->SetVec3("gGravityDir", glm::vec3(0.0, 0.0, -1.0));
+            mComputeParticals->SetInt("particalNum", mParticalNum);
             for (int pass = 0; pass <= 1; pass++) {
                 mComputeParticals->SetUInt("pass", pass);
-                glDispatchCompute(mParticalNum, 1, 1);
+                glDispatchCompute(mParticalNum / 512 + 1, 1, 1);
                 glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             }
             mComputeParticals->UnUse();
@@ -255,7 +256,7 @@ namespace Fluid3d {
     }
 
     void RenderWidget::BuildShaders() {
-        mComputeParticals = new Glb::ComputeShader();
+        mComputeParticals = new Glb::ComputeShader("ComputeParticals");
         std::vector<std::string> computeShaderpaths = {
             std::string("../code/Fluid3d/Shaders/ComputeParticals.comp"),
         };
@@ -289,25 +290,10 @@ namespace Fluid3d {
         std::string pointSpriteThicknessFragPath = "../code/Fluid3d/Shaders/PointSpriteThickness.frag";
         mPointSpriteThickness->BuildFromFile(pointSpriteThicknessVertPath, pointSpriteThicknessFragPath, pointSpriteThicknessGeomPath);
 
-        mComputeNormal = new Glb::ComputeShader();
-        std::string computeNormalPath = "../code/Fluid3d/Shaders/ComputeNormal.comp";
-        mComputeNormal->BuildFromFile(computeNormalPath);
-
-        mBlurZ = new Glb::ComputeShader();
-        std::string blurZPath = "../code/Fluid3d/Shaders/BlurZ.comp";
-        mBlurZ->BuildFromFile(blurZPath);
-        mBlurZ->Use();
-        mBlurZ->SetInt("weightBuffer", 0);
-        mBlurZ->UnUse();
-
         mDrawFluidColor = new Glb::Shader();
         std::string drawFluidColorVertPath = "../code/Fluid3d/Shaders/DrawFluidColor.vert";
         std::string drawFluidColorFragPath = "../code/Fluid3d/Shaders/DrawFluidColor.frag";
         mDrawFluidColor->BuildFromFile(drawFluidColorVertPath, drawFluidColorFragPath);
-        mDrawFluidColor->Use();
-        glUniform1i(glGetUniformLocation(mDrawFluidColor->GetId(), "textureNormal"), 0);
-        glUniform1i(glGetUniformLocation(mDrawFluidColor->GetId(), "skybox"), 1);
-        mDrawFluidColor->UnUse();
 
         mDrawModel = new Glb::Shader();
         std::string drawModelVertPath = "../code/Fluid3d/Shaders/DrawModel.vert";
@@ -317,32 +303,8 @@ namespace Fluid3d {
     }
 
     void RenderWidget::InitFilters() {
-        mDepthFilter = new BilaterialFilter(8.0, 0.025);
-        mDepthFilter->PreCalculate(2);
-        
-        // 传入纹理 
-        glBindTexture(GL_TEXTURE_2D, mTexDepthFilter);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 
-            mDepthFilter->GetWeightBufferSize().x, mDepthFilter->GetWeightBufferSize().y, 
-            0, GL_RED, GL_FLOAT,
-            mDepthFilter->GetWeightBuffer());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        // 索引传入Buffer
-        std::vector<glm::ivec2> kernelIndexes = BilaterialFilter::GenerateIndexes(2);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBufferKernelIndexs5x5);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, kernelIndexes.size() * sizeof(glm::ivec2), kernelIndexes.data(), GL_STATIC_DRAW);
-
-        kernelIndexes = BilaterialFilter::GenerateIndexes(4);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBufferKernelIndexs9x9);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, kernelIndexes.size() * sizeof(glm::ivec2), kernelIndexes.data(), GL_STATIC_DRAW);
-
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
+        mDepthFilter = new DepthFilter();
+        mDepthFilter->Create(8.0, 0.025);
     }
 
     void RenderWidget::GenerateFrameBuffers() {
@@ -396,8 +358,6 @@ namespace Fluid3d {
         glGenBuffers(1, &mCoordVertBuffer);     // coord vbo
         glGenBuffers(1, &mBufferParticals);     // ssbo
         glGenBuffers(1, &mBufferBlocks);
-        glGenBuffers(1, &mBufferKernelIndexs5x5);
-        glGenBuffers(1, &mBufferKernelIndexs9x9);
         glGenBuffers(1, &mBufferFloor);
     }
 
@@ -431,13 +391,10 @@ namespace Fluid3d {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        // DepthFilterBuffer
-        glGenTextures(1, &mTexDepthFilter);
-
     }
 
     void RenderWidget::LoadSkyBox() {
-        mSkyBox = new Glb::SkyBox();
+        mSkyBox = new SkyBox();
         mSkyBox->Create();
         std::vector<std::string> paths
         {
@@ -452,11 +409,22 @@ namespace Fluid3d {
         mSkyBox->BuildShader();
     }
 
-    void RenderWidget::LoadMaterials() {
+    void RenderWidget::CreateRenderAssets() {
+        // 材质
         mSlabWhite = new Material();
         mSlabWhite->Create();
         std::string albedoPath = "../resources/SlabWhite/TexturesCom_Marble_SlabWhite_1K_albedo.png";
         mSlabWhite->LoadTexures(albedoPath);
+
+        // 灯光
+        mLight.pos = glm::vec3(-1.0, -1.0, 1.0);
+        mLight.dir = glm::vec3(1.5, 1.5, -1.0);
+        mLight.aspect = 1.0f;
+        mLight.fovy = 30.0;
+
+        // 阴影贴图
+        mShadowMap = new FluidShadowMap();
+        mShadowMap->Create(1000, 1000, mLight);
     }
 
     void RenderWidget::MakeVertexArrays() {
@@ -512,7 +480,6 @@ namespace Fluid3d {
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_PROGRAM_POINT_SIZE);
 
         // 画深度图
         mPointSpriteZValue->Use();
@@ -525,6 +492,11 @@ namespace Fluid3d {
         glBindVertexArray(mVaoParticals);
         glDrawArrays(GL_POINTS, 0, mParticalNum);
         mPointSpriteZValue->UnUse();
+
+        // 模糊深度
+        GLuint bufferA = mTexZBuffer;
+        GLuint bufferB = mTexZBlurTempBuffer;
+        mDepthFilter->Filter(bufferA, bufferB, glm::ivec2(mWindowWidth, mWindowHeight));
 
         // 画厚度图
         glBindFramebuffer(GL_FRAMEBUFFER, mFboThickness);
@@ -547,32 +519,8 @@ namespace Fluid3d {
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
 
-        // 模糊深度
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mTexDepthFilter);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mBufferKernelIndexs5x5);
-        mBlurZ->Use();
-        mBlurZ->SetInt("indexesSize", 25);
-        mBlurZ->SetFloat("sigma1", mDepthFilter->mSigma1);
-        mBlurZ->SetFloat("sigma2", mDepthFilter->mSigma2);
-        GLuint bufferA = mTexZBuffer;
-        GLuint bufferB = mTexZBlurTempBuffer;
-        for (int i = 0; i < 4; i++) {
-            mBlurZ->SetInt("filterInterval", std::pow(2, i));
-            glBindImageTexture(0, bufferA, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
-            glBindImageTexture(1, bufferB, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
-            glDispatchCompute(mWindowWidth, mWindowHeight, 1);
-            glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            std::swap(bufferA, bufferB);
-        }
-
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mBufferKernelIndexs9x9);
-        mBlurZ->SetInt("indexesSize", 81);
-        mBlurZ->SetInt("filterInterval", 1);
-        glBindImageTexture(0, bufferA, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
-        glBindImageTexture(1, bufferB, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
-        glDispatchCompute(mWindowWidth, mWindowHeight, 1);
-        glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        // 阴影
+        mShadowMap->Update(mVaoParticals, mParticalNum);
 
         // 渲染
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -586,9 +534,13 @@ namespace Fluid3d {
         glDepthFunc(GL_LESS);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mSlabWhite->mTexAlbedo);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetTextureId());
         mDrawModel->Use();
         mDrawModel->SetMat4("view", mCamera.GetView());
         mDrawModel->SetMat4("projection", mCamera.GetProjection());
+        mDrawModel->SetMat4("lightView", mShadowMap->mLightView);
+        mDrawModel->SetMat4("lightProjection", mShadowMap->mLightProjection);
         glBindVertexArray(mVaoFloor);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
@@ -597,8 +549,12 @@ namespace Fluid3d {
         mSkyBox->Draw(mWindow, mVaoNull, mCamera.GetView(), mCamera.GetProjection());
 
         // 画流体
-        glActiveTexture(GL_TEXTURE1);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, mSkyBox->GetId());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, mSlabWhite->mTexAlbedo);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetTextureId());
         glBindImageTexture(0, bufferB, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
         glBindImageTexture(1, mTexThicknessBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mBufferFloor);
@@ -606,12 +562,14 @@ namespace Fluid3d {
         mDrawFluidColor->SetMat4("camToWorldRot", glm::transpose(mCamera.GetView()));
         mDrawFluidColor->SetMat4("camToWorld", glm::inverse(mCamera.GetView()));
         mDrawFluidColor->SetMat4("projection", mCamera.GetProjection());
+        mDrawFluidColor->SetMat4("lightView", mShadowMap->mLightView);
+        mDrawFluidColor->SetMat4("lightProjection", mShadowMap->mLightProjection);
         glBindVertexArray(mVaoParticals);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
         mDrawFluidColor->UnUse();
 
-        
+
 
 //#define TEST_QUAD
 #ifdef TEST_QUAD
@@ -621,7 +579,7 @@ namespace Fluid3d {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mTexThicknessBuffer);
+        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetTextureId());
         mScreenQuad->Use();
         glBindVertexArray(mVaoNull);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

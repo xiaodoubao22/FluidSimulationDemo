@@ -5,10 +5,10 @@
 
 #include <iostream>
 
-namespace Glb {
+namespace Fluid3d {
 
 	SkyBox::SkyBox() {
-		mShader = new Shader();
+		mShader = new Glb::Shader();
 	}
 
 	SkyBox::~SkyBox() {

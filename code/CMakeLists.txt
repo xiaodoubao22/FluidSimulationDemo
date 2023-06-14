@@ -81,7 +81,6 @@ set(FLUID_3D_SRC_FILES
 set(FLUID_3D_SHADER_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Shaders)
 set(FLUID_3D_SHADER_FILES
     ${FLUID_3D_SHADER_DIR}/BlurZ.comp
-    ${FLUID_3D_SHADER_DIR}/ComputeNormal.comp
     ${FLUID_3D_SHADER_DIR}/ComputeParticals.comp
     ${FLUID_3D_SHADER_DIR}/DrawColor3d.frag
     ${FLUID_3D_SHADER_DIR}/DrawColor3d.vert
@@ -97,7 +96,6 @@ set(FLUID_3D_SHADER_FILES
     ${FLUID_3D_SHADER_DIR}/ScreenQuad.vert
     ${FLUID_3D_SHADER_DIR}/SkyBox.frag
     ${FLUID_3D_SHADER_DIR}/SkyBox.vert
-    ${FLUID_3D_SHADER_DIR}/TestCompute.comp
     )
 
 # 全局包含目录

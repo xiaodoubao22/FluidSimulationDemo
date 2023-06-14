@@ -11,7 +11,7 @@ uniform uint pass;
 uniform uint gLocalSize;
 
 uniform uvec3 blockNum;
-uniform uvec3 particalNum;
+uniform int particalNum;
 uniform vec3 blockSize;
 uniform vec3 containerLowerBound;
 uniform vec3 containerUpperBound;
@@ -27,7 +27,7 @@ uniform highp float gExponent;
 uniform highp float gViscosity;
 
 // local size
-layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 512, local_size_y = 1, local_size_z = 1) in;
 
 // ----------structs----------
 struct ParticalInfo3d {
@@ -91,6 +91,9 @@ void ComputeDensityAndPress(inout ParticalInfo3d pi) {
 
 void ComputeAccleration(inout ParticalInfo3d pi) {
     uint particalId = gl_GlobalInvocationID.x;
+    if (particalId >= particalNum) {
+        return;
+    }
 
     float dim = 3.0;
     float constFactor = 2.0 * (dim + 2.0) * gViscosity;

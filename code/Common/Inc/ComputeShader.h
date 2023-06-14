@@ -10,7 +10,8 @@ namespace Glb {
 
 	class ComputeShader {
 	public:
-		ComputeShader();
+		ComputeShader() = delete;
+		ComputeShader(std::string name);
 		~ComputeShader();
 
 		int32_t BuildFromFile(std::string& compPath);
@@ -35,6 +36,7 @@ namespace Glb {
 		void SetMat4(const std::string& name, const glm::mat4& mat);
 
 	private:
+		std::string mName;
 		GLuint mId = 0;
 
 	};

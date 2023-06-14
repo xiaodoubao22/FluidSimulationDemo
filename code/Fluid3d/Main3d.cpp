@@ -11,8 +11,8 @@ struct test {
 int main() {
 
     Fluid3d::ParticalSystem3D ps;
-    ps.SetContainerSize(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.5, 0.5, 0.5));
-    ps.AddFluidBlock(glm::vec3(0.1, 0.1, 0.25), glm::vec3(0.2, 0.2, 0.13), glm::vec3(-1.0, -1.0, -3.0), 0.01 * 0.7);
+    ps.SetContainerSize(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.6, 0.6, 0.6));
+    ps.AddFluidBlock(glm::vec3(0.2, 0.2, 0.25), glm::vec3(0.2, 0.2, 0.3), glm::vec3(-1.0, 0.0, -3.0), 0.01 * 0.7);
     //ps.AddFluidBlock(glm::vec3(0.0, 0.2, 0.15), glm::vec3(0.15, 0.15, 0.2), glm::vec3(0.0, -1.0, -1.0), 0.01 * 0.85);
     //ps.AddFluidBlock(glm::vec3(0.1, 0.0, 0.05), glm::vec3(0.1, 0.1, 0.3), glm::vec3(-1.0, 1.0, -0.5), 0.01 * 0.85);
     ps.UpdateData();
@@ -21,11 +21,11 @@ int main() {
     Fluid3d::RenderWidget renderer;
     renderer.Init();
     renderer.UploadUniforms(ps);
-    
+
     while (!renderer.ShouldClose()) {
         renderer.ProcessInput();    // 处理输入事件
         
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 8; i++) {
             ps.UpdateData();
             renderer.UploadParticalInfo(ps);
             renderer.SolveParticals();

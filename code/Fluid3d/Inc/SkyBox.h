@@ -11,7 +11,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #endif // !STB_IMAGE_IMPLEMENTATION
 
-namespace Glb {
+namespace Fluid3d {
 	class SkyBox {
 	public:
 		SkyBox();
@@ -30,7 +30,7 @@ namespace Glb {
 
 	private:
 		GLuint mId = 0;
-		Shader* mShader = nullptr;
+		Glb::Shader* mShader = nullptr;
 
 	};
 }

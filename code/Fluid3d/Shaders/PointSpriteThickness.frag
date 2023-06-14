@@ -11,17 +11,6 @@ in vec2 texCoordQuad;
 
 out vec4 fragColor;
 
-float invFar = 1.0 / 100.0;
-float invNear = 1.0 / 0.1;
-
-float DepthToZ(float depth) { 
-    return - 1.0 / (depth * (invFar - invNear) + invNear);
-}
-
-float ZToDepth(float z) {
-    return ((1 / abs(z)) - invNear) / (invFar - invNear);
-}
-
 void main() {
 
     float dist = distance(fragPosition, particalCenter);
