@@ -10,7 +10,7 @@
 
 <img src="./figure/3dFluid.png" width="600"> 
 
-<img src="./figure/3dWater.gif" width="600">
+<img src="./figure/3dResult.gif" width="600">
 
 ### 2D模拟及牛奶效果渲染
 
@@ -25,3 +25,5 @@
   
   
   
+
+
