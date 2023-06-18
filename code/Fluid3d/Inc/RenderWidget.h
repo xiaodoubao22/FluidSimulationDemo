@@ -14,7 +14,7 @@
 #include "SkyBox.h"
 #include "DepthFilter.h"
 #include "Material.h"
-#include "ShadowMap.h"
+#include "FluidShadowMap.h"
 
 namespace Fluid3d {
     class RenderWidget
@@ -44,6 +44,7 @@ namespace Fluid3d {
         static void CursorPosCallBack(GLFWwindow* window, double xpos, double ypos);
         static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
         static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+        static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
 
     private:
         bool CreateWindow();
@@ -72,6 +73,8 @@ namespace Fluid3d {
         float mLastY;
         bool mLeftPressFlag = false;
         bool mRightPressFlag = false;
+        bool mMiddlePressFlag = false;
+        bool mPauseFlag = false;
 
         // shaders
         Glb::Shader* mScreenQuad = nullptr;
@@ -106,7 +109,6 @@ namespace Fluid3d {
         GLuint mTestTexture = 0;
         GLuint mTexKernelBuffer = 0;
         GLuint mTexZBlurTempBuffer = 0;
-        
 
         // SkyBox
         SkyBox* mSkyBox = nullptr;
@@ -125,6 +127,8 @@ namespace Fluid3d {
         FluidShadowMap* mShadowMap;
 
         DepthFilter* mDepthFilter;
+
+        glm::vec3 mExternelAccleration = { 0.0, 0.0, 0.0 };
     };
 }
 

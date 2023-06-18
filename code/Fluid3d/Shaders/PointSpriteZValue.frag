@@ -1,22 +1,22 @@
 #version 450
 
-uniform float particalRadius;
-
 in vec3 particalCenter;
 in vec3 fragPosition;
 in vec2 texCoordQuad;
 
 out vec4 fragColor;
 
-float invFar = 1.0 / 100.0;
-float invNear = 1.0 / 0.1;
+uniform float particalRadius;
+uniform float zNear;
+uniform float zFar;
 
 float DepthToZ(float depth) { 
-    return - 1.0 / (depth * (invFar - invNear) + invNear);
+    return - zFar * zNear / (zNear * depth + zFar * (1.0 - depth));
 }
 
-float ZToDepth(float z) {
-    return ((1 / abs(z)) - invNear) / (invFar - invNear);
+float ZToDepth(in float z) {
+    z = abs(z);
+    return zFar * (zNear - z) / (z * (zNear - zFar));
 }
 
 void main() {

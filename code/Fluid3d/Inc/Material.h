@@ -13,10 +13,14 @@ namespace Fluid3d {
 
 		void Create();
 		void Destroy();
-		void LoadTexures(std::string& albedoPath);
+		void LoadTextures(std::string& albedoPath, std::string& roughnessPath);
+
+	private:
+		void LoadTexture(GLuint texId, std::string& path);
 
 	public:
 		GLuint mTexAlbedo = 0;
+		GLuint mTexRoughness = 0;
 	};
 
 }

@@ -58,7 +58,8 @@ set(FLUID_2D_SHADER_FILES
 # [Fluid3d]设置头文件路径
 set(FLUID_3D_INC_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Inc)
 set(FLUID_3D_INC_FILES
-    ${FLUID_3D_INC_DIR}/BilateralFilter.h
+    ${FLUID_3D_INC_DIR}/DepthFilter.h
+    ${FLUID_3D_INC_DIR}/FluidShadowMap.h
     ${FLUID_3D_INC_DIR}/Material.h
     ${FLUID_3D_INC_DIR}/Parameters3d.h
     ${FLUID_3D_INC_DIR}/ParticalSystem3d.h
@@ -69,7 +70,8 @@ set(FLUID_3D_INC_FILES
 # [Fluid3d]设置源文件路径
 set(FLUID_3D_SRC_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Src)
 set(FLUID_3D_SRC_FILES
-    ${FLUID_3D_SRC_DIR}/BilateralFilter.cpp
+    ${FLUID_3D_SRC_DIR}/DepthFilter.cpp
+    ${FLUID_3D_SRC_DIR}/FluidShadowMap.cpp
     ${FLUID_3D_SRC_DIR}/Material.cpp
     ${FLUID_3D_SRC_DIR}/ParticalSystem3d.cpp
     ${FLUID_3D_SRC_DIR}/RenderCamera.cpp
@@ -81,6 +83,8 @@ set(FLUID_3D_SRC_FILES
 set(FLUID_3D_SHADER_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Shaders)
 set(FLUID_3D_SHADER_FILES
     ${FLUID_3D_SHADER_DIR}/BlurZ.comp
+    ${FLUID_3D_SHADER_DIR}/CausticMap.frag
+    ${FLUID_3D_SHADER_DIR}/CausticMap.vert
     ${FLUID_3D_SHADER_DIR}/ComputeParticals.comp
     ${FLUID_3D_SHADER_DIR}/DrawColor3d.frag
     ${FLUID_3D_SHADER_DIR}/DrawColor3d.vert

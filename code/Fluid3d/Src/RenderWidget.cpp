@@ -5,8 +5,6 @@
 #include <fstream>
 #include <thread>
 
-const unsigned int TEXTURE_WIDTH = 1000, TEXTURE_HEIGHT = 1000;
-
 const glm::vec3 vertexes[] = {
     glm::vec3(0.0, 0.0, 0.0),
     glm::vec3(1.0, 0.0, 0.0),
@@ -28,9 +26,13 @@ std::vector<float_t> floorVertices = {
      1.0f, -1.0f, 0.0f, 1.0, 0.0,
 };
 
+glm::mat4 floorModel;
+
 namespace Fluid3d {
     RenderWidget::RenderWidget() {
-
+        floorModel = glm::mat4(1.0);
+        floorModel = glm::scale(floorModel, glm::vec3(0.6));
+        floorModel = glm::translate(floorModel, glm::vec3(0.5, 0.5, 0.0));
     }
 
     RenderWidget::~RenderWidget() {
@@ -99,24 +101,27 @@ namespace Fluid3d {
     }
 
     void RenderWidget::SolveParticals() {
-        if (mParticalNum > 0) {
-            glFinish();
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, mBufferParticals);
-            glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, mBufferBlocks);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_1D, mTexKernelBuffer);
-            glBindImageTexture(0, mTestTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
-            mComputeParticals->Use();
-            //mComputeParticals->SetVec3("gGravityDir", -mCamera.GetUp());
-            mComputeParticals->SetVec3("gGravityDir", glm::vec3(0.0, 0.0, -1.0));
-            mComputeParticals->SetInt("particalNum", mParticalNum);
-            for (int pass = 0; pass <= 1; pass++) {
-                mComputeParticals->SetUInt("pass", pass);
-                glDispatchCompute(mParticalNum / 512 + 1, 1, 1);
-                glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-            }
-            mComputeParticals->UnUse();
+        if (mParticalNum <= 0 || mPauseFlag) {
+            return;
         }
+
+        glFinish();
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, mBufferParticals);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, mBufferBlocks);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_1D, mTexKernelBuffer);
+        glBindImageTexture(0, mTestTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+        mComputeParticals->Use();
+        mComputeParticals->SetVec3("gGravityDir", -Glb::Z_AXIS);
+        mComputeParticals->SetVec3("gExternelAccleration", mExternelAccleration * 0.5f);
+        mComputeParticals->SetInt("particalNum", mParticalNum);
+        for (int pass = 0; pass <= 1; pass++) {
+            mComputeParticals->SetUInt("pass", pass);
+            glDispatchCompute(mParticalNum / 512 + 1, 1, 1);
+            glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+        }
+        mComputeParticals->UnUse();
+
     }
 
     void RenderWidget::Update() {
@@ -150,7 +155,7 @@ namespace Fluid3d {
 
     void RenderWidget::CursorPosCallBack(GLFWwindow* window, double xpos, double ypos) {
         auto thisPtr = reinterpret_cast<RenderWidget*>(glfwGetWindowUserPointer(window));
-        if (!(thisPtr->mLeftPressFlag || thisPtr->mRightPressFlag)) {
+        if (!(thisPtr->mLeftPressFlag || thisPtr->mRightPressFlag || thisPtr->mMiddlePressFlag)) {
             return;
         }
 
@@ -169,6 +174,9 @@ namespace Fluid3d {
         else if (thisPtr->mRightPressFlag) {
             thisPtr->mCamera.ProcessMove(glm::vec2(xOffset, yOffset));
         }
+        else if (thisPtr->mMiddlePressFlag) {
+            thisPtr->mExternelAccleration = thisPtr->mCamera.GetRight() * xOffset - thisPtr->mCamera.GetUp() * yOffset;
+        }
         
         thisPtr->mLastX = xpos;
         thisPtr->mLastY = ypos;
@@ -177,14 +185,18 @@ namespace Fluid3d {
     void RenderWidget::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
         auto thisPtr = reinterpret_cast<RenderWidget*>(glfwGetWindowUserPointer(window));
         if (action == GLFW_PRESS) {
+            thisPtr->mFirstMouseFlag = true;
             if (button == GLFW_MOUSE_BUTTON_LEFT) {
                 thisPtr->mLeftPressFlag = true;
-                thisPtr->mFirstMouseFlag = true;
             }
             else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
                 thisPtr->mRightPressFlag = true;
-                thisPtr->mFirstMouseFlag = true;
+                
             }
+            else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+                thisPtr->mMiddlePressFlag = true;
+            }
+
         }
         else if (action == GLFW_RELEASE) {
             if (button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -193,12 +205,27 @@ namespace Fluid3d {
             else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
                 thisPtr->mRightPressFlag = false;
             }
+            else if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+                thisPtr->mMiddlePressFlag = false;
+                thisPtr->mExternelAccleration = glm::vec3(0.0);
+            }
         }
     }
 
     void RenderWidget::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
         auto thisPtr = reinterpret_cast<RenderWidget*>(glfwGetWindowUserPointer(window));
         thisPtr->mCamera.ProcessScale(static_cast<float>(yoffset));
+    }
+
+    void RenderWidget::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+        auto thisPtr = reinterpret_cast<RenderWidget*>(glfwGetWindowUserPointer(window));
+        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+            thisPtr->mPauseFlag = true;
+        }
+        else if (key == GLFW_KEY_SPACE && action == GLFW_RELEASE) {
+            thisPtr->mPauseFlag = false;
+        }
+            
     }
 
     bool RenderWidget::CreateWindow() {
@@ -225,6 +252,7 @@ namespace Fluid3d {
         glfwSetCursorPosCallback(mWindow, CursorPosCallBack);
         glfwSetMouseButtonCallback(mWindow, MouseButtonCallback);
         glfwSetScrollCallback(mWindow, ScrollCallback);
+        glfwSetKeyCallback(mWindow, KeyCallback);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
@@ -283,6 +311,10 @@ namespace Fluid3d {
         std::string pointSpriteZValueGeomPath = "../code/Fluid3d/Shaders/PointSprite.geom";
         std::string pointSpriteZValueFragPath = "../code/Fluid3d/Shaders/PointSpriteZValue.frag";
         mPointSpriteZValue->BuildFromFile(pointSpriteZValueVertPath, pointSpriteZValueFragPath, pointSpriteZValueGeomPath);
+        mPointSpriteZValue->Use();
+        mPointSpriteZValue->SetFloat("zFar", Para3d::zFar);
+        mPointSpriteZValue->SetFloat("zNear", Para3d::zNear);
+        mPointSpriteZValue->UnUse();
 
         mPointSpriteThickness = new Glb::Shader();
         std::string pointSpriteThicknessVertPath = "../code/Fluid3d/Shaders/PointSprite.vert";
@@ -294,6 +326,16 @@ namespace Fluid3d {
         std::string drawFluidColorVertPath = "../code/Fluid3d/Shaders/DrawFluidColor.vert";
         std::string drawFluidColorFragPath = "../code/Fluid3d/Shaders/DrawFluidColor.frag";
         mDrawFluidColor->BuildFromFile(drawFluidColorVertPath, drawFluidColorFragPath);
+        mDrawFluidColor->Use();
+        mDrawFluidColor->SetFloat("zFar", Para3d::zFar);
+        mDrawFluidColor->SetFloat("zNear", Para3d::zNear);
+        mDrawFluidColor->SetFloat("eta", 1.0 / Para3d::IOR);
+        mDrawFluidColor->SetVec3("f0", Para3d::F0);
+        mDrawFluidColor->SetVec4("cameraIntrinsic", Glb::ProjToIntrinsic(mCamera.GetProjection(), mWindowWidth, mWindowHeight));
+        mDrawFluidColor->SetVec3("fluidColor", Para3d::FLUID_COLOR);
+        mDrawFluidColor->SetVec3("shadowColor", Para3d::SHADOW_COLOR);
+        mDrawFluidColor->SetFloat("thicknessFactor", Para3d::THICKNESS_FACTOR);
+        mDrawFluidColor->UnUse();
 
         mDrawModel = new Glb::Shader();
         std::string drawModelVertPath = "../code/Fluid3d/Shaders/DrawModel.vert";
@@ -414,17 +456,21 @@ namespace Fluid3d {
         mSlabWhite = new Material();
         mSlabWhite->Create();
         std::string albedoPath = "../resources/SlabWhite/TexturesCom_Marble_SlabWhite_1K_albedo.png";
-        mSlabWhite->LoadTexures(albedoPath);
+        std::string roughnessPath = "../resources/SlabWhite/TexturesCom_Marble_SlabWhite_1K_roughness.png";
+        mSlabWhite->LoadTextures(albedoPath, roughnessPath);
 
         // µÆ¹â
-        mLight.pos = glm::vec3(-1.0, -1.0, 1.0);
-        mLight.dir = glm::vec3(1.5, 1.5, -1.0);
+        mLight.pos = glm::vec3(-0.8, -0.8, 2.0);
+        mLight.dir = glm::vec3(0.5, 0.5, -1.0);
         mLight.aspect = 1.0f;
         mLight.fovy = 30.0;
 
         // ÒõÓ°ÌùÍ¼
         mShadowMap = new FluidShadowMap();
-        mShadowMap->Create(1000, 1000, mLight);
+        mShadowMap->SetImageSize(1000, 1000);
+        mShadowMap->SetLightInfo(mLight);
+        mShadowMap->SetIor(Para3d::IOR);
+        mShadowMap->Init();
     }
 
     void RenderWidget::MakeVertexArrays() {
@@ -477,6 +523,7 @@ namespace Fluid3d {
 
         // Ô¤´¦Àí
         glBindFramebuffer(GL_FRAMEBUFFER, mFboDepth);
+        glViewport(0, 0, mWindowWidth, mWindowHeight);
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -500,6 +547,7 @@ namespace Fluid3d {
 
         // »­ºñ¶ÈÍ¼
         glBindFramebuffer(GL_FRAMEBUFFER, mFboThickness);
+        glViewport(0, 0, mWindowWidth, mWindowHeight);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -520,23 +568,33 @@ namespace Fluid3d {
         glEnable(GL_DEPTH_TEST);
 
         // ÒõÓ°
-        mShadowMap->Update(mVaoParticals, mParticalNum);
+        mShadowMap->Update(mVaoParticals, mParticalNum, mDepthFilter);
 
         // äÖÈ¾
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, mWindowWidth, mWindowHeight);
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        mShadowMap->DrawCaustic(&mCamera, mVaoNull, floorModel);
+
         // »­µØ°å
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mSlabWhite->mTexAlbedo);
+        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetShadowMap());
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetTextureId());
+        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetCausticMap());
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, mSkyBox->GetId());
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, mSlabWhite->mTexAlbedo);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, mSlabWhite->mTexRoughness);
         mDrawModel->Use();
+        mDrawModel->SetMat4("model", floorModel);
         mDrawModel->SetMat4("view", mCamera.GetView());
         mDrawModel->SetMat4("projection", mCamera.GetProjection());
         mDrawModel->SetMat4("lightView", mShadowMap->mLightView);
@@ -545,22 +603,25 @@ namespace Fluid3d {
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
         mDrawModel->UnUse();
-
-        mSkyBox->Draw(mWindow, mVaoNull, mCamera.GetView(), mCamera.GetProjection());
-
+        
         // »­Á÷Ìå
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, mSkyBox->GetId());
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, mSlabWhite->mTexAlbedo);
+        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetShadowMap());
         glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetTextureId());
+        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetCausticMap());
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, mSlabWhite->mTexAlbedo);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, mSlabWhite->mTexRoughness);
         glBindImageTexture(0, bufferB, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
         glBindImageTexture(1, mTexThicknessBuffer, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mBufferFloor);
         mDrawFluidColor->Use();
         mDrawFluidColor->SetMat4("camToWorldRot", glm::transpose(mCamera.GetView()));
         mDrawFluidColor->SetMat4("camToWorld", glm::inverse(mCamera.GetView()));
+        mDrawFluidColor->SetMat4("model", floorModel);
         mDrawFluidColor->SetMat4("projection", mCamera.GetProjection());
         mDrawFluidColor->SetMat4("lightView", mShadowMap->mLightView);
         mDrawFluidColor->SetMat4("lightProjection", mShadowMap->mLightProjection);
@@ -569,7 +630,7 @@ namespace Fluid3d {
         glBindVertexArray(0);
         mDrawFluidColor->UnUse();
 
-
+        mSkyBox->Draw(mWindow, mVaoNull, mCamera.GetView(), mCamera.GetProjection());
 
 //#define TEST_QUAD
 #ifdef TEST_QUAD
@@ -579,7 +640,7 @@ namespace Fluid3d {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetTextureId());
+        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetCausticMap());
         mScreenQuad->Use();
         glBindVertexArray(mVaoNull);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

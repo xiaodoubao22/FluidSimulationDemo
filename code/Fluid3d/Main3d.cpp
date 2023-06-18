@@ -4,17 +4,12 @@
 #include "Global.h"
 #include "ParticalSystem3d.h"
 
-struct test {
-    float a[200];
-};
-
 int main() {
 
     Fluid3d::ParticalSystem3D ps;
     ps.SetContainerSize(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.6, 0.6, 0.6));
-    ps.AddFluidBlock(glm::vec3(0.2, 0.2, 0.25), glm::vec3(0.2, 0.2, 0.3), glm::vec3(-1.0, 0.0, -3.0), 0.01 * 0.7);
-    //ps.AddFluidBlock(glm::vec3(0.0, 0.2, 0.15), glm::vec3(0.15, 0.15, 0.2), glm::vec3(0.0, -1.0, -1.0), 0.01 * 0.85);
-    //ps.AddFluidBlock(glm::vec3(0.1, 0.0, 0.05), glm::vec3(0.1, 0.1, 0.3), glm::vec3(-1.0, 1.0, -0.5), 0.01 * 0.85);
+    ps.AddFluidBlock(glm::vec3(0.05, 0.35, 0.25), glm::vec3(0.15, 0.15, 0.3), glm::vec3(0.0, 0.0, -3.0), 0.01 * 0.8);
+    ps.AddFluidBlock(glm::vec3(0.35, 0.05, 0.25), glm::vec3(0.15, 0.15, 0.3), glm::vec3(0.0, 0.0, -3.0), 0.01 * 0.8);
     ps.UpdateData();
     std::cout << "partical num = " << ps.mParticalInfos.size() << std::endl;
     
@@ -24,8 +19,7 @@ int main() {
 
     while (!renderer.ShouldClose()) {
         renderer.ProcessInput();    // 处理输入事件
-        
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < Para3d::substep; i++) {
             ps.UpdateData();
             renderer.UploadParticalInfo(ps);
             renderer.SolveParticals();

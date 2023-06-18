@@ -38,7 +38,7 @@ namespace Fluid3d {
 		float mSupportRadius = Para3d::supportRadius;    // 支撑半径
 		float mSupportRadius2 = mSupportRadius * mSupportRadius;
 		float mParticalRadius = Para3d::particalRadius;   // 粒子半径
-		float mParticalDiameter = 2.0f * mParticalRadius;
+		float mParticalDiameter = Para3d::     particalDiameter;
 		float mVolume = std::pow(mParticalDiameter, 3);    // 体积
 		float mMass = Para3d::density0 * mVolume;  // 质量
 		float mViscosity = Para3d::viscosity;            // 粘度系数

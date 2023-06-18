@@ -16,7 +16,6 @@ uniform int indexesSize;
 uniform float sigma1;
 uniform float sigma2;
 
-
 float Weight(float d1, float d2) {
     vec2 texCoord = vec2(d1 / (3.0 * sigma1), d2 / (3.0 * sigma2));
     return texture(weightBuffer, texCoord).r;

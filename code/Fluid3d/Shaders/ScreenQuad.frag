@@ -6,7 +6,10 @@ in vec2 TexCoords;
 uniform sampler2D tex;
 	
 void main()
-{             
-    vec3 texCol = texture(tex, TexCoords).rgb;      
-    FragColor = vec4(abs(texCol) / 3.0, 1.0);
+{	
+    vec4 texCol = texture(tex, TexCoords);
+//	if(texCol.x > 0) {
+//		discard;
+//	}
+    FragColor = vec4(vec3(texCol.rgb), 1.0);
 }

@@ -1,22 +1,19 @@
 #version 430 core
 
 // ----------const----------
-float fxInv = 0.0011547;    // 2 * tan(fovx/2) / w
-float fyInv = 0.0011547;    // 2 * tan(fovy/2) / w
-float cx = 500;
-float cy = 500;
-
-float ior = 1.0 / 1.5;
-
-float zFarInv = 1.0 / 100.0;
-float zNearInv = 1.0 / 0.1;
-
-vec3 f0 = vec3(0.15, 0.15, 0.15);
-
-vec3 fluidColor = vec3(0.1, 0.5, 1.0);
-const vec3 shadowColor = 0.5 * vec3(0.1, 0.5, 1.0);
-
 const float EPS = 1e-5;
+const float FLT_MAX = 1e+10;
+
+uniform vec4 cameraIntrinsic;  // vec4(fxInv, fyInv, cx, cy)
+uniform float zNear;
+uniform float zFar;
+uniform mat4 model;
+
+uniform float eta;
+uniform vec3 f0;
+uniform vec3 fluidColor;
+uniform vec3 shadowColor;
+uniform float thicknessFactor;
 
 // ----------define----------
 struct Vertex {
@@ -25,9 +22,6 @@ struct Vertex {
 };
 
 struct Triangle {
-    // Vertex v0;
-    // Vertex v1;
-    // Vertex v2;
     vec3 pos0;
     vec2 texCoord0;
     vec3 pos1;
@@ -67,9 +61,11 @@ layout(r32f, binding = 1) uniform image2D thicknessBuffer;
 // {
 //     Triangle triangles[];
 // };
-layout(binding = 0) uniform samplerCube skybox;
-layout(binding=1) uniform sampler2D texAlbedo;
-layout(binding=2) uniform sampler2D shadowMap;
+layout(binding=0) uniform samplerCube skybox;
+layout(binding=1) uniform sampler2D shadowMap;
+layout(binding=2) uniform sampler2D causticMap;
+layout(binding=3) uniform sampler2D texAlbedo;
+layout(binding=4) uniform sampler2D texRoughness;
 
 Triangle T0 = {
     vec3(1.0,  1.0, 0.0),
@@ -93,81 +89,45 @@ Triangle triangles[2] = {
 };
 
 // ----------functinons----------
-vec3 FresnelSchlic(vec3 wi, vec3 wh);
-vec3 Reproject(float depth, ivec2 imageCoord) ;
-float ZToDepth(float z);
-vec3 CalculateNormal(ivec2 curPixelId, float curDepth, vec3 curPos);
-HitResult Intersect(Ray ray, Triangle triangle);
-HitResult IntesectAllTriangles(Ray ray);
-
-// ------------阴影相关函数--------------
-vec2 NdcToTexCoord(vec2 NdcXy);
-float Pcf(vec2 texCoord, float fragDist);
-vec3 ShadeFloorWithShadow(vec3 originColor, vec3 lightPos, vec3 curPosition);
-
-vec3 GetRayTraceColor(Ray ray);
-float TransparentFactor(float thickness);
-
-void main()
-{
-    ivec2 curPixelId = ivec2(gl_FragCoord.xy);
-    float curDepth = imageLoad(zBuffer, curPixelId).x;
-    if (curDepth > 0.0) {
-        discard;
-    }
-
-    // 写入深度
-    gl_FragDepth = ZToDepth(curDepth);
-
-    // 计算位置
-    vec3 curPos = Reproject(curDepth, curPixelId);
-    vec4 curPoseOnWorld = camToWorld * vec4(curPos, 1.0);
-
-    // 计算各种向量
-    vec4 normal = vec4(CalculateNormal(curPixelId, curDepth, curPos), 1.0);
-    vec4 normalOnWorld = camToWorldRot * normal;
-    vec3 wiOnCamera = vec3((gl_FragCoord.x - cx) * fxInv, (gl_FragCoord.y - cy) * fyInv, -1.0);
-    vec4 wiOnWorld = camToWorldRot * vec4(normalize(wiOnCamera), 1.0);
-    vec3 woReflect = reflect(wiOnWorld.xyz, normalOnWorld.xyz);
-    vec3 woRefract = refract(wiOnWorld.xyz, normalOnWorld.xyz, ior);
-    vec3 fresnel = FresnelSchlic(wiOnWorld.xyz, normalOnWorld.xyz);
-
-    // 反射颜色
-    Ray refractRay;
-    refractRay.origin = curPoseOnWorld.xyz;
-    refractRay.direction = woRefract;
-    vec3 refractColor = GetRayTraceColor(refractRay);
-
-    float thickness = imageLoad(thicknessBuffer, curPixelId).x;
-    float transparentFactor = TransparentFactor(thickness * 2.0);
-    refractColor = transparentFactor * refractColor + (1.0 - transparentFactor) * fluidColor;
-
-    // 折射颜色
-    Ray reflectRay;
-    reflectRay.origin = curPoseOnWorld.xyz;
-    reflectRay.direction = woReflect;
-    vec3 reflectColor = GetRayTraceColor(reflectRay);
-
-    // 混合
-    vec3 outColor = mix(refractColor, reflectColor, fresnel);
-
-    FragColor = vec4(outColor, 1.0);
-}
-
-// ----------functinons----------
 vec3 FresnelSchlic(vec3 wi, vec3 wh) {
     float cosTheta = abs(dot(wh, wi));
     return f0 + (1.0 - f0) * pow(1.0 - cosTheta, 5.0);
 }
 
 vec3 Reproject(float depth, ivec2 imageCoord) { 
-    float x = abs(depth) * (float(imageCoord.x) - cx) * fxInv;
-    float y = abs(depth) * (float(imageCoord.y) - cy) * fyInv;   
+    // cameraIntrinsic = vec4(fxInv, fyInv, cx, cy)
+    float x = abs(depth) * (float(imageCoord.x) - cameraIntrinsic.z) * cameraIntrinsic.x;
+    float y = abs(depth) * (float(imageCoord.y) - cameraIntrinsic.w) * cameraIntrinsic.y;   
     return vec3(x, y, depth);
 }
 
-float ZToDepth(float z) {
-    return ((1 / abs(z)) - zNearInv) / (zFarInv - zNearInv);
+float ZToDepth(in float z) {
+    z = abs(z);
+    return zFar * (zNear - z) / (z * (zNear - zFar));
+}
+
+vec3 lightColor = vec3(1.0);
+vec3 Normal = vec3(0.0, 0.0, 1.0);
+vec3 PhongShading(vec3 albedo, float roughness, vec3 lightPos, vec3 fragPos, vec3 viewPos) {
+    // ambient
+    float ambientStrength = 0.3;
+    vec3 ambient = ambientStrength * lightColor;
+  	
+    // diffuse 
+    float defuseStrength = 3.0;
+    vec3 norm = normalize(Normal);
+    vec3 lightDir = normalize(lightPos - fragPos);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = roughness * defuseStrength * diff * lightColor;
+    
+    // specular
+    float specularStrength = 0.3;
+    vec3 viewDir = normalize(viewPos - fragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);  
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 4);
+    vec3 specular = (1.0 - roughness) * specularStrength * spec * lightColor;  
+        
+    return (ambient + diffuse + specular) * albedo;
 }
 
 vec3 CalculateNormal(ivec2 curPixelId, float curDepth, vec3 curPos) {
@@ -198,7 +158,7 @@ vec3 CalculateNormal(ivec2 curPixelId, float curDepth, vec3 curPos) {
 HitResult Intersect(Ray ray, Triangle triangle) {
 	HitResult res;
     res.isHit = -1;
-    res.dist = 1e+10;
+    res.dist = FLT_MAX;
 	
 	vec3 E1 = triangle.pos1 - triangle.pos0;
 	vec3 E2 = triangle.pos2 - triangle.pos0;
@@ -238,7 +198,7 @@ HitResult Intersect(Ray ray, Triangle triangle) {
 HitResult IntesectAllTriangles(Ray ray) {
     HitResult minRes;
     minRes.isHit = -1;
-    minRes.dist = 1e+10;
+    minRes.dist = FLT_MAX;
     for(int i = 0; i < 2; i++) {
         HitResult res = Intersect(ray, triangles[i]);
         if(res.isHit == 1 && res.dist < minRes.dist) {
@@ -270,29 +230,92 @@ float Pcf(vec2 texCoord, float fragDist) {
 
 vec3 ShadeFloorWithShadow(vec3 originColor, vec3 lightPos, vec3 curPosition) {
     // 投影到光源，取纹理坐标
-    vec4 fragNDC = lightProjection * lightView * vec4(curPosition, 1.0);
+    vec4 fragNDC = lightProjection * lightView * model * vec4(curPosition, 1.0);
     fragNDC /= fragNDC.w;
-    vec2 shadowTexCoord = NdcToTexCoord(fragNDC.xy);
+    vec2 texCoord = NdcToTexCoord(fragNDC.xy);
 
     // PCF法计算阴影
     float fragDist = distance(lightPos, curPosition);
-    float shadowFactor = 0.2 * Pcf(shadowTexCoord, fragDist);
-    return mix(originColor, shadowColor, shadowFactor);
+    float shadowFactor = 0.2 * Pcf(texCoord, fragDist);
+    vec3 colorWithShadow = mix(originColor, shadowColor, shadowFactor);
+
+    // 添加焦散
+    vec3 caustic = texture(causticMap, texCoord).xyz;
+
+    return colorWithShadow + caustic;
 }
 
-vec3 GetRayTraceColor(Ray ray) {
+vec3 GetRayTraceColor(Ray ray, vec3 fragPosition, vec3 viewPosition) {
     HitResult res = IntesectAllTriangles(ray);
     if (res.isHit == 1) {
         vec3 albedo = texture(texAlbedo, res.texCoord).rgb;
+        float roughness = texture(texRoughness, res.texCoord).r;
         vec4 lightPos = inverse(lightView) * vec4(0.0, 0.0, 0.0, 1.0);
-        return ShadeFloorWithShadow(albedo, lightPos.xyz, res.hitPoint);
-        return albedo;
+        vec3 originColor = PhongShading(albedo, roughness, lightPos.xyz, fragPosition, viewPosition);
+
+        return ShadeFloorWithShadow(originColor, lightPos.xyz, res.hitPoint);
     } else {    
         return texture(skybox, ray.direction.xzy).rgb;
     }
     return vec3(0.0);
 }
 
+// beer定律
 float TransparentFactor(float thickness) {
-    return max(exp(-0.5 * thickness), 0.2);
+    return max(exp(-thicknessFactor * thickness), 0.2);
 }
+
+vec3 imageCoordToWi(vec4 intrinsic, ivec2 imageCoord) {
+    return vec3((imageCoord.x - intrinsic.z) * intrinsic.x, (imageCoord.y - intrinsic.w) * intrinsic.y, -1.0);
+}
+
+void main()
+{
+    ivec2 curPixelId = ivec2(gl_FragCoord.xy);
+    float curDepth = imageLoad(zBuffer, curPixelId).x;
+    if (curDepth > 0.0) {
+        discard;
+    }
+
+    // 写入深度
+    gl_FragDepth = ZToDepth(curDepth);
+
+    vec4 camearOrigin = camToWorld * vec4(0.0, 0.0, 0.0, 1.0);
+
+    // 计算位置
+    vec3 curPos = Reproject(curDepth, curPixelId);
+    vec4 curPoseOnWorld = camToWorld * vec4(curPos, 1.0);
+
+    // 计算各种向量
+    vec4 normal = vec4(CalculateNormal(curPixelId, curDepth, curPos), 1.0);
+    vec4 normalOnWorld = camToWorldRot * normal;
+    vec3 wiOnCamera = imageCoordToWi(cameraIntrinsic, curPixelId);
+    vec4 wiOnWorld = camToWorldRot * vec4(normalize(wiOnCamera), 1.0);
+    vec3 woReflect = reflect(wiOnWorld.xyz, normalOnWorld.xyz);
+    vec3 woRefract = refract(wiOnWorld.xyz, normalOnWorld.xyz, eta);
+    vec3 fresnel = FresnelSchlic(wiOnWorld.xyz, normalOnWorld.xyz);
+
+    mat4 worldToModel = inverse(model);
+
+    // 折射颜色
+    Ray refractRay;     // 模型局部坐标系下
+    refractRay.origin = (worldToModel * curPoseOnWorld).xyz;
+    refractRay.direction = mat3(worldToModel) * woRefract;
+    vec3 refractColor = GetRayTraceColor(refractRay, curPoseOnWorld.xyz, camearOrigin.xyz);
+
+    float thickness = imageLoad(thicknessBuffer, curPixelId).x;
+    float transparentFactor = TransparentFactor(thickness * 2.0);
+    refractColor = transparentFactor * refractColor + (1.0 - transparentFactor) * fluidColor;
+
+    // 反射颜色
+    Ray reflectRay;
+    reflectRay.origin = (worldToModel * curPoseOnWorld).xyz;
+    reflectRay.direction = mat3(worldToModel) * woReflect;
+    vec3 reflectColor = GetRayTraceColor(reflectRay, curPoseOnWorld.xyz, camearOrigin.xyz);
+
+    // 混合
+    vec3 outColor = mix(refractColor, reflectColor, fresnel);
+
+    FragColor = vec4(outColor, 1.0);
+}
+
