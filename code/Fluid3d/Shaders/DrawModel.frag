@@ -23,7 +23,7 @@ vec3 PhongShading(vec3 albedo, float roughness, vec3 lightPos, vec3 fragPos, vec
     // ambient
     float ambientStrength = 0.3;
     vec3 ambient = ambientStrength * lightColor;
-  	
+      
     // diffuse 
     float defuseStrength = 3.0;
     vec3 norm = normalize(Normal);

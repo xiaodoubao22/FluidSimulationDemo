@@ -14,9 +14,9 @@ vec2 texCoords[4] = {
 };
 
 uniform vec3 testData;
-	
+    
 out vec2 TexCoords;
-	
+    
 void main()
 {
     TexCoords = texCoords[gl_VertexID];

@@ -2,7 +2,7 @@
 #include <iostream>
 
 namespace Fluid3d {
-	RenderCamera::RenderCamera() {
+    RenderCamera::RenderCamera() {
         mYaw = 90.0f;
         mPitch = 15.0f;
 
@@ -16,11 +16,11 @@ namespace Fluid3d {
         float farPlane = 100.0f;
         float fovyDeg = 60.0f;
         mProjection = glm::perspective(glm::radians(fovyDeg), aspect, nearPlane, farPlane);
-	}
+    }
 
-	RenderCamera::~RenderCamera() {
+    RenderCamera::~RenderCamera() {
         
-	}
+    }
 
     void RenderCamera::ProcessMove(glm::vec2 offset) {
         mTargetPoint -= offset.x * mSensitiveX * mRight;

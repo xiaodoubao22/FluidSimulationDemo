@@ -4,15 +4,15 @@
 #include <iostream>
 
 namespace Glb {
-	ComputeShader::ComputeShader(std::string name) {
+    ComputeShader::ComputeShader(std::string name) {
         mName = name;
-	}
+    }
 
-	ComputeShader::~ComputeShader() {
-	
-	}
+    ComputeShader::~ComputeShader() {
+    
+    }
 
-	int32_t ComputeShader::BuildFromFile(std::string& compPath) {
+    int32_t ComputeShader::BuildFromFile(std::string& compPath) {
         std::string shaderCode;
         std::ifstream shaderFile;
         std::stringstream shaderStream;
@@ -61,7 +61,7 @@ namespace Glb {
         std::cout << "compute shader success mName:" << mName << std::endl;
 
         return 0;
-	}
+    }
 
     int32_t ComputeShader::BuildFromFiles(std::vector<std::string>& compPaths) {
         std::vector<GLuint> computeShaders(compPaths.size());
@@ -120,17 +120,17 @@ namespace Glb {
         std::cout << "compute shader build files success mName:" << mName << std::endl;
     }
 
-	void ComputeShader::Use() {
+    void ComputeShader::Use() {
         glUseProgram(mId);
-	}
+    }
 
-	void ComputeShader::UnUse() {
+    void ComputeShader::UnUse() {
         glUseProgram(0);
-	}
+    }
 
-	GLuint ComputeShader::GetId() {
+    GLuint ComputeShader::GetId() {
         return mId;
-	}
+    }
 
     void ComputeShader::SetBool(const std::string& name, bool value)
     {

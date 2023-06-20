@@ -6,22 +6,22 @@
 #include <string>
 
 namespace Fluid3d {
-	class Material {
-	public:
-		Material();
-		~Material();
+    class Material {
+    public:
+        Material();
+        ~Material();
 
-		void Create();
-		void Destroy();
-		void LoadTextures(std::string& albedoPath, std::string& roughnessPath);
+        void Create();
+        void Destroy();
+        void LoadTextures(std::string& albedoPath, std::string& roughnessPath);
 
-	private:
-		void LoadTexture(GLuint texId, std::string& path);
+    private:
+        void LoadTexture(GLuint texId, std::string& path);
 
-	public:
-		GLuint mTexAlbedo = 0;
-		GLuint mTexRoughness = 0;
-	};
+    public:
+        GLuint mTexAlbedo = 0;
+        GLuint mTexRoughness = 0;
+    };
 
 }
 

@@ -112,7 +112,7 @@ vec3 PhongShading(vec3 albedo, float roughness, vec3 lightPos, vec3 fragPos, vec
     // ambient
     float ambientStrength = 0.3;
     vec3 ambient = ambientStrength * lightColor;
-  	
+      
     // diffuse 
     float defuseStrength = 3.0;
     vec3 norm = normalize(Normal);
@@ -156,43 +156,43 @@ vec3 CalculateNormal(ivec2 curPixelId, float curDepth, vec3 curPos) {
 }
 
 HitResult Intersect(Ray ray, Triangle triangle) {
-	HitResult res;
+    HitResult res;
     res.isHit = -1;
     res.dist = FLT_MAX;
-	
-	vec3 E1 = triangle.pos1 - triangle.pos0;
-	vec3 E2 = triangle.pos2 - triangle.pos0;
-	vec3 Q = cross(ray.direction, E2);
+    
+    vec3 E1 = triangle.pos1 - triangle.pos0;
+    vec3 E2 = triangle.pos2 - triangle.pos0;
+    vec3 Q = cross(ray.direction, E2);
 
-	float a = dot(E1, Q);
-	if (abs(a) < EPS) {
+    float a = dot(E1, Q);
+    if (abs(a) < EPS) {
         return res;
     }
 
-	float f = 1.0 / a;
-	vec3 S = ray.origin - triangle.pos0;
-	float u = f * dot(S, Q);
-	if (u < 0.0) {
+    float f = 1.0 / a;
+    vec3 S = ray.origin - triangle.pos0;
+    float u = f * dot(S, Q);
+    if (u < 0.0) {
         return res;
     }
 
-	vec3 R = cross(S, E1);
-	float v = f * dot(ray.direction, R);
-	if (v < 0.0 || u + v > 1.0) {
+    vec3 R = cross(S, E1);
+    float v = f * dot(ray.direction, R);
+    if (v < 0.0 || u + v > 1.0) {
         return res;
     }
 
-	float t = f * dot(E2, R);
-	if (t < EPS) {
+    float t = f * dot(E2, R);
+    if (t < EPS) {
         return res;
     }
 
-	res.isHit = 1;
-	res.hitPoint = ray.origin + t * ray.direction;
-	res.dist = t;
-	res.normal = cross(E1, E2);
-	res.texCoord = (1.0 - u - v) * triangle.texCoord0 + u * triangle.texCoord1  + v * triangle.texCoord2;
-	return res;
+    res.isHit = 1;
+    res.hitPoint = ray.origin + t * ray.direction;
+    res.dist = t;
+    res.normal = cross(E1, E2);
+    res.texCoord = (1.0 - u - v) * triangle.texCoord0 + u * triangle.texCoord1  + v * triangle.texCoord2;
+    return res;
 }
 
 HitResult IntesectAllTriangles(Ray ray) {

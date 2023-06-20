@@ -43,9 +43,9 @@ struct ParticalInfo3d {
 };
 
 struct NeighborInfo {
-	vec3 radiusIj;
-	float distanceIj;
-	int neighborId;
+    vec3 radiusIj;
+    float distanceIj;
+    int neighborId;
 };
 
 
@@ -164,7 +164,7 @@ void BoundaryCondition(inout ParticalInfo3d pi) {
 void CalculateBlockId(inout ParticalInfo3d pi) {
     vec3 deltePos = pi.position - containerLowerBound;
     uvec3 blockPosition = uvec3(floor(deltePos / blockSize));
-	pi.blockId = blockPosition.z * blockNum.x * blockNum.y + blockPosition.y * blockNum.x + blockPosition.x;
+    pi.blockId = blockPosition.z * blockNum.x * blockNum.y + blockPosition.y * blockNum.x + blockPosition.x;
 }
 
 // ----------main----------
