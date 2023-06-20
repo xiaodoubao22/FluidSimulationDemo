@@ -1,4 +1,4 @@
-#include "ComputeShader.h"
+ï»¿#include "ComputeShader.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -16,7 +16,7 @@ namespace Glb {
         std::string shaderCode;
         std::ifstream shaderFile;
         std::stringstream shaderStream;
-        // ¶ÁÈ¡ compute shader
+        // è¯»å– compute shader
         shaderFile.open(compPath);
         if (!shaderFile) {
             std::cout << "ERROR: Compute shader file open failed name:" << mName <<  std::endl;
@@ -69,7 +69,7 @@ namespace Glb {
             std::string shaderCode;
             std::ifstream shaderFile;
             std::stringstream shaderStream;
-            // ¶ÁÈ¡ compute shader
+            // è¯»å– compute shader
             shaderFile.open(compPaths[i]);
             if (!shaderFile) {
                 std::cout << "error: Compute shader file " << i << " open failed mName:" << mName << std::endl;

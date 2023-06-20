@@ -1,4 +1,4 @@
-#version 450
+ï»¿#version 450
 
 in vec2 fragTexCoord;
 in vec3 fragPosition;
@@ -61,17 +61,17 @@ float Pcf(vec2 texCoord, float fragDist) {
 }
 
 vec3 ShadeFloorWithShadow(vec3 originColor, vec3 lightPos, vec3 curPosition) {
-    // Í¶Ó°µ½¹âÔ´£¬È¡ÎÆÀí×ø±ê
+    // æŠ•å½±åˆ°å…‰æºï¼Œå–çº¹ç†åæ ‡
     vec4 fragNDC = lightProjection * lightView * vec4(curPosition, 1.0);
     fragNDC /= fragNDC.w;
     vec2 texCoord = NdcToTexCoord(fragNDC.xy);
 
-    // PCF·¨¼ÆËãÒõÓ°
+    // PCFæ³•è®¡ç®—é˜´å½±
     float fragDist = distance(lightPos, curPosition);
     float shadowFactor = 0.2 * Pcf(texCoord, fragDist);
     vec3 colorWithShadow = mix(originColor, shadowColor, shadowFactor);
 
-    // Ìí¼Ó½¹É¢
+    // æ·»åŠ ç„¦æ•£
     vec3 caustic = texture(causticMap, texCoord).xyz;
 
     return colorWithShadow + caustic;

@@ -1,4 +1,4 @@
-#include "Material.h"
+ï»¿#include "Material.h"
 
 #include "stb_image.h"
 #include <iostream>
@@ -31,7 +31,7 @@ namespace Fluid3d {
 	}
 
 	void Material::LoadTexture(GLuint texId, std::string& path) {
-		// ¼ÓÔØ²¢Éú³ÉÎÆÀí
+		// åŠ è½½å¹¶ç”Ÿæˆçº¹ç†
 		int width, height, nrChannels;
 		unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
 		if (!data)

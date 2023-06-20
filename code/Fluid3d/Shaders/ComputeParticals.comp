@@ -1,4 +1,4 @@
-#version 450 core
+﻿#version 450 core
 // ----------consts----------
 const float gGravity = 9.8;
 const float gDeltaT = 4e-4;
@@ -68,7 +68,7 @@ uniform sampler1D kernelBuffer;
 // ----------functions----------
 void EulerIntegration(inout ParticalInfo3d pi) {
     pi.velosity = pi.velosity + gDeltaT * pi.accleration;
-    pi.velosity = clamp(pi.velosity, vec3(-gMaxVelocity), vec3(gMaxVelocity));    // �ٶ�����
+    pi.velosity = clamp(pi.velosity, vec3(-gMaxVelocity), vec3(gMaxVelocity));    // 速度限制
     pi.position = pi.position + gDeltaT * pi.velosity;
 }
 
@@ -158,7 +158,7 @@ void BoundaryCondition(inout ParticalInfo3d pi) {
     }
 
     pi.position = clamp(pi.position, containerLowerBound + vec3(gSupportRadius + gEps), containerUpperBound - vec3(gSupportRadius + gEps));
-    pi.velosity = clamp(pi.velosity, vec3(-gMaxVelocity), vec3(gMaxVelocity));    // �ٶ�����
+    pi.velosity = clamp(pi.velosity, vec3(-gMaxVelocity), vec3(gMaxVelocity));    // 速度限制
 }
 
 void CalculateBlockId(inout ParticalInfo3d pi) {

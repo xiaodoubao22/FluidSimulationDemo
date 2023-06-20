@@ -1,4 +1,4 @@
-#include "RenderWidget.h"
+ï»¿#include "RenderWidget.h"
 #include "Global.h"
 
 #include <iostream>
@@ -53,7 +53,7 @@ namespace Fluid3d {
         InitFilters();
         LoadSkyBox();
         CreateRenderAssets();
-        MakeVertexArrays(); // Éú³É»­Á£×ÓµÄvao
+        MakeVertexArrays(); // ç”Ÿæˆç”»ç²’å­çš„vao
 
         glGenVertexArrays(1, &mVaoNull);
         glEnable(GL_MULTISAMPLE);
@@ -82,11 +82,11 @@ namespace Fluid3d {
     }
 
     void RenderWidget::UploadParticalInfo(Fluid3d::ParticalSystem3D& ps) {
-        // ÉêÇë×°Á£×ÓĞÅÏ¢µÄbuffer
+        // ç”³è¯·è£…ç²’å­ä¿¡æ¯çš„buffer
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBufferParticals);
         glBufferData(GL_SHADER_STORAGE_BUFFER, ps.mParticalInfos.size() * sizeof(ParticalInfo3d), ps.mParticalInfos.data(), GL_DYNAMIC_COPY);
 
-        // ÉêÇëblockÇø¼äbuffer
+        // ç”³è¯·blockåŒºé—´buffer
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBufferBlocks);
         glBufferData(GL_SHADER_STORAGE_BUFFER, ps.mBlockExtens.size() * sizeof(glm::uvec2), ps.mBlockExtens.data(), GL_DYNAMIC_COPY);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -94,7 +94,7 @@ namespace Fluid3d {
     }
 
     void RenderWidget::DumpParticalInfo(Fluid3d::ParticalSystem3D& ps) {
-        // °ÑÁ£×ÓĞÅÏ¢¿½»ØCPU
+        // æŠŠç²’å­ä¿¡æ¯æ‹·å›CPU
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBufferParticals);
         glGetBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, mParticalNum * sizeof(ParticalInfo3d), (void*)ps.mParticalInfos.data());
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
@@ -126,8 +126,8 @@ namespace Fluid3d {
 
     void RenderWidget::Update() {
         DrawParticals();
-        UpdateFPS();    // ÏÔÊ¾FPS
-        glfwSwapBuffers(mWindow);   // ½»»»Ç°ºó»º³å
+        UpdateFPS();    // æ˜¾ç¤ºFPS
+        glfwSwapBuffers(mWindow);   // äº¤æ¢å‰åç¼“å†²
     }
 
     bool RenderWidget::ShouldClose() {
@@ -147,7 +147,7 @@ namespace Fluid3d {
     }
 
     void RenderWidget::ResizeCallback(GLFWwindow* window, int width, int height) {
-        // ÕÒµ½thisÖ¸Õë
+        // æ‰¾åˆ°thisæŒ‡é’ˆ
         auto thisPtr = reinterpret_cast<RenderWidget*>(glfwGetWindowUserPointer(window));
         glViewport(0, 0, width, height);
         thisPtr->mCamera.SetPerspective(float(width) / float(height));
@@ -230,12 +230,12 @@ namespace Fluid3d {
 
     bool RenderWidget::CreateWindow() {
         glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);  // °æ±¾
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);  // ç‰ˆæœ¬
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_SAMPLES, 9);    // ¶àÖØ²ÉÑù
+        glfwWindowHint(GLFW_SAMPLES, 9);    // å¤šé‡é‡‡æ ·
 
-        // ´´½¨´°¿Ú
+        // åˆ›å»ºçª—å£
         mWindow = glfwCreateWindow(mWindowWidth, mWindowHeight, "Fluid Simulation", NULL, NULL);
         if (mWindow == nullptr)
         {
@@ -246,7 +246,7 @@ namespace Fluid3d {
         glfwSetWindowPos(mWindow, 100, 100);
         glfwMakeContextCurrent(mWindow);
 
-        // ×¢²á»Øµ÷º¯Êı
+        // æ³¨å†Œå›è°ƒå‡½æ•°
         glfwSetWindowUserPointer(mWindow, this);
         glfwSetFramebufferSizeCallback(mWindow, ResizeCallback);
         glfwSetCursorPosCallback(mWindow, CursorPosCallBack);
@@ -264,14 +264,14 @@ namespace Fluid3d {
     }
 
     void RenderWidget::UpdateFPS() {
-        // ¼ÆËãFPS
+        // è®¡ç®—FPS
         float currentTime = glfwGetTime();
         float deltaTime = currentTime - mUpdateTime;
         mUpdateTime = currentTime;
         updateTitleTime += deltaTime;
         frameCount += 1.0f;
 
-        // ¸üĞÂFPS
+        // æ›´æ–°FPS
         if (updateTitleTime > 1.0f) {
             char title[128] = "";
             sprintf_s(title, "Fluid Simulation FPS=%.2f", frameCount / updateTitleTime);
@@ -404,7 +404,7 @@ namespace Fluid3d {
     }
 
     void RenderWidget::GenerateTextures() {
-        // ²âÊÔÓÃµÄÎÆÀí
+        // æµ‹è¯•ç”¨çš„çº¹ç†
         glGenTextures(1, &mTestTexture);
         glBindTexture(GL_TEXTURE_2D, mTestTexture);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -414,7 +414,7 @@ namespace Fluid3d {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 100, 100, 0, GL_RGBA, GL_FLOAT, NULL);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        // ºËº¯ÊıÎÆÀí
+        // æ ¸å‡½æ•°çº¹ç†
         glGenTextures(1, &mTexKernelBuffer);
         glBindTexture(GL_TEXTURE_1D, mTexKernelBuffer);
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -423,7 +423,7 @@ namespace Fluid3d {
         glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_1D, 0);
 
-        // Ä£ºıZºóµÄ×ø±êÍ¼
+        // æ¨¡ç³ŠZåçš„åæ ‡å›¾
         glGenTextures(1, &mTexZBlurTempBuffer);
         glBindTexture(GL_TEXTURE_2D, mTexZBlurTempBuffer);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, mWindowWidth, mWindowHeight, 0, GL_RED, GL_FLOAT, NULL);
@@ -452,20 +452,20 @@ namespace Fluid3d {
     }
 
     void RenderWidget::CreateRenderAssets() {
-        // ²ÄÖÊ
+        // æè´¨
         mSlabWhite = new Material();
         mSlabWhite->Create();
         std::string albedoPath = "../resources/SlabWhite/TexturesCom_Marble_SlabWhite_1K_albedo.png";
         std::string roughnessPath = "../resources/SlabWhite/TexturesCom_Marble_SlabWhite_1K_roughness.png";
         mSlabWhite->LoadTextures(albedoPath, roughnessPath);
 
-        // µÆ¹â
+        // ç¯å…‰
         mLight.pos = glm::vec3(-0.8, -0.8, 2.0);
         mLight.dir = glm::vec3(0.5, 0.5, -1.0);
         mLight.aspect = 1.0f;
         mLight.fovy = 30.0;
 
-        // ÒõÓ°ÌùÍ¼
+        // é˜´å½±è´´å›¾
         mShadowMap = new FluidShadowMap();
         mShadowMap->SetImageSize(1000, 1000);
         mShadowMap->SetLightInfo(mLight);
@@ -504,7 +504,7 @@ namespace Fluid3d {
 
     void RenderWidget::DrawParticals() {
         glFinish();
-        // ÒÔµãµÄĞÎÊ½»­Á£×Ó
+        //// ä»¥ç‚¹çš„å½¢å¼ç”»ç²’å­
         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         //glEnable(GL_DEPTH_TEST);
@@ -521,14 +521,14 @@ namespace Fluid3d {
         //mSkyBox->Draw(mWindow, mVaoNull, mCamera.GetView(), mCamera.GetProjection());
         //mDrawColor3d->UnUse();
 
-        // Ô¤´¦Àí
+        // é¢„å¤„ç†
         glBindFramebuffer(GL_FRAMEBUFFER, mFboDepth);
         glViewport(0, 0, mWindowWidth, mWindowHeight);
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // »­Éî¶ÈÍ¼
+        // ç”»æ·±åº¦å›¾
         mPointSpriteZValue->Use();
         mPointSpriteZValue->SetMat4("view", mCamera.GetView());
         mPointSpriteZValue->SetMat4("projection", mCamera.GetProjection());
@@ -540,12 +540,12 @@ namespace Fluid3d {
         glDrawArrays(GL_POINTS, 0, mParticalNum);
         mPointSpriteZValue->UnUse();
 
-        // Ä£ºıÉî¶È
+        // æ¨¡ç³Šæ·±åº¦
         GLuint bufferA = mTexZBuffer;
         GLuint bufferB = mTexZBlurTempBuffer;
         mDepthFilter->Filter(bufferA, bufferB, glm::ivec2(mWindowWidth, mWindowHeight));
 
-        // »­ºñ¶ÈÍ¼
+        // ç”»åšåº¦å›¾
         glBindFramebuffer(GL_FRAMEBUFFER, mFboThickness);
         glViewport(0, 0, mWindowWidth, mWindowHeight);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -567,10 +567,10 @@ namespace Fluid3d {
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
 
-        // ÒõÓ°
+        // é˜´å½±
         mShadowMap->Update(mVaoParticals, mParticalNum, mDepthFilter);
 
-        // äÖÈ¾
+        // æ¸²æŸ“
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, mWindowWidth, mWindowHeight);
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -580,7 +580,7 @@ namespace Fluid3d {
 
         mShadowMap->DrawCaustic(&mCamera, mVaoNull, floorModel);
 
-        // »­µØ°å
+        // ç”»åœ°æ¿
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glActiveTexture(GL_TEXTURE0);
@@ -604,7 +604,7 @@ namespace Fluid3d {
         glBindVertexArray(0);
         mDrawModel->UnUse();
         
-        // »­Á÷Ìå
+        // ç”»æµä½“
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, mSkyBox->GetId());
         glActiveTexture(GL_TEXTURE1);
@@ -640,7 +640,7 @@ namespace Fluid3d {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mShadowMap->GetCausticMap());
+        glBindTexture(GL_TEXTURE_2D, mTexThicknessBuffer);
         mScreenQuad->Use();
         glBindVertexArray(mVaoNull);
         //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

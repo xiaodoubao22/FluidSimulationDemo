@@ -1,4 +1,4 @@
-#ifndef COMPUTE_SHADER_H
+﻿#ifndef COMPUTE_SHADER_H
 #define COMPUTE_SHADER_H
 
 #include <glad/glad.h>

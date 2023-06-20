@@ -1,4 +1,4 @@
-#include "ParticalSystem3d.h"
+ï»¿#include "ParticalSystem3d.h"
 #include <iostream>
 #include <algorithm>
 #include <Global.h>
@@ -17,12 +17,12 @@ namespace Fluid3d {
 		mContainerCenter = (mLowerBound + mUpperBound) / 2.0f;
 		size = mUpperBound - mLowerBound;
 
-		// Èı¸ö·½ÏòµÄblockÊıÁ¿
+		// ä¸‰ä¸ªæ–¹å‘çš„blockæ•°é‡
 		mBlockNum.x = floor(size.x / mSupportRadius);
 		mBlockNum.y = floor(size.y / mSupportRadius);
 		mBlockNum.z = floor(size.z / mSupportRadius);
 
-		// Ò»¸öblockµÄ´óĞ¡
+		// ä¸€ä¸ªblockçš„å¤§å°
 		mBlockSize = glm::vec3(size.x / mBlockNum.x, size.y / mBlockNum.y, size.z / mBlockNum.z);
 
 		mBlockIdOffs.resize(27);
@@ -93,21 +93,21 @@ namespace Fluid3d {
 	}
 
 	void ParticalSystem3D::UpdateData() {
-		// °´blockÅÅĞò
+		// æŒ‰blockæ’åº
 		std::sort(mParticalInfos.begin(), mParticalInfos.end(),
 			[=](ParticalInfo3d& first, ParticalInfo3d& second) {
 				return first.blockId < second.blockId;
 			}
 		);
 
-		// ¼ÆËãblockÇø¼ä
+		// è®¡ç®—blockåŒºé—´
 		mBlockExtens = std::vector<glm::uvec2>(mBlockNum.x * mBlockNum.y * mBlockNum.z, glm::uvec2(0, 0));
 		int curBlockId = 0;
 		int left = 0;
 		int right;
 		for (right = 0; right < mParticalInfos.size(); right++) {
 			if (mParticalInfos[right].blockId != curBlockId) {
-				mBlockExtens[curBlockId] = glm::uvec2(left, right);		// ×ó±ÕÓÒ¿ª
+				mBlockExtens[curBlockId] = glm::uvec2(left, right);		// å·¦é—­å³å¼€
 				left = right;
 				curBlockId = mParticalInfos[right].blockId;
 			}

@@ -1,4 +1,4 @@
-#include <Shader.h>
+Ôªø#include <Shader.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -19,7 +19,7 @@ namespace Glb {
         std::string vertexCode, geometryCode, fragmentCode;
         std::ifstream vertShaderFile, geomShaderFile, fragShaderFile;
         std::stringstream vShaderStream, gShaderStream, fShaderStream;
-        // ∂¡»° vertex shader
+        // ËØªÂèñ vertex shader
         vertShaderFile.open(vertPath);
         if (!vertShaderFile) {
             std::cout << "ERROR: Vertex shader file open failed" << std::endl;
@@ -45,7 +45,7 @@ namespace Glb {
             return -1;
         }
 
-        // ∂¡»° fragment Shader
+        // ËØªÂèñ fragment Shader
         fragShaderFile.open(fragPath);
         if (!fragShaderFile) {
             std::cout << "ERROR: Fragment shader file open failed" << std::endl;
@@ -71,7 +71,7 @@ namespace Glb {
 
         unsigned int geometry = 0;
         if (geomPath != std::string("")) {
-            // ∂¡»° geometry Shader
+            // ËØªÂèñ geometry Shader
             geomShaderFile.open(geomPath);
             if (!geomShaderFile) {
                 std::cout << "ERROR: Geometry shader file open failed" << std::endl;

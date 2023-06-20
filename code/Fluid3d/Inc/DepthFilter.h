@@ -1,4 +1,4 @@
-#ifndef DEPTH_FILTER_H
+﻿#ifndef DEPTH_FILTER_H
 #define DEPTH_FILTER_H
 
 #include <vector>

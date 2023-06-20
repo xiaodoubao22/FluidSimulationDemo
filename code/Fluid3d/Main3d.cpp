@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include "RenderWidget.h"
 #include <thread>
 #include "Global.h"
@@ -10,6 +10,7 @@ int main() {
     ps.SetContainerSize(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.6, 0.6, 0.6));
     ps.AddFluidBlock(glm::vec3(0.05, 0.35, 0.25), glm::vec3(0.15, 0.15, 0.3), glm::vec3(0.0, 0.0, -3.0), 0.01 * 0.8);
     ps.AddFluidBlock(glm::vec3(0.35, 0.05, 0.25), glm::vec3(0.15, 0.15, 0.3), glm::vec3(0.0, 0.0, -3.0), 0.01 * 0.8);
+    //ps.AddFluidBlock(glm::vec3(0.2, 0.2, 0.25), glm::vec3(0.2, 0.2, 0.3), glm::vec3(0.0, 0.0, 0.0), 0.01 * 0.8);
     ps.UpdateData();
     std::cout << "partical num = " << ps.mParticalInfos.size() << std::endl;
     
@@ -18,7 +19,7 @@ int main() {
     renderer.UploadUniforms(ps);
 
     while (!renderer.ShouldClose()) {
-        renderer.ProcessInput();    // ´¦ÀíÊäÈëÊÂ¼þ
+        renderer.ProcessInput();    // å¤„ç†è¾“å…¥äº‹ä»¶
         for (int i = 0; i < Para3d::substep; i++) {
             ps.UpdateData();
             renderer.UploadParticalInfo(ps);

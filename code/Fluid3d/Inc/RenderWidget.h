@@ -1,4 +1,4 @@
-#ifndef RENDER_WIDGET_H
+ï»¿#ifndef RENDER_WIDGET_H
 #define RENDER_WIDGET_H
 
 #include <glad/glad.h>
@@ -25,12 +25,12 @@ namespace Fluid3d {
 
         int32_t Init();
 
-        // ÉÏ´«¡¢¶ÁÈ¡Êı¾İ
+        // ä¸Šä¼ ã€è¯»å–æ•°æ®
         void UploadUniforms(Fluid3d::ParticalSystem3D& ps);
         void UploadParticalInfo(Fluid3d::ParticalSystem3D& ps);
         void DumpParticalInfo(Fluid3d::ParticalSystem3D& ps);
 
-        // Çó½â¡¢äÖÈ¾
+        // æ±‚è§£ã€æ¸²æŸ“
         void SolveParticals();
         void Update();
         

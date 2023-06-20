@@ -1,4 +1,4 @@
-#include "WCubicSpline.h"
+﻿#include "WCubicSpline.h"
 #include <glm/ext/scalar_constants.hpp>
 #include <iostream>
 

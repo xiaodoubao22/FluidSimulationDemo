@@ -1,4 +1,4 @@
-#include "DepthFilter.h"
+Ôªø#include "DepthFilter.h"
 
 namespace Fluid3d {
 	DepthFilter::DepthFilter() {
@@ -21,7 +21,7 @@ namespace Fluid3d {
 	}
 
 	void DepthFilter::Filter(GLuint& bufferA, GLuint& bufferB, glm::ivec2 imageSize) {
-		// ƒ£∫˝…Ó∂»
+		// Ê®°Á≥äÊ∑±Â∫¶
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, mTexDepthFilter);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, mBufferKernelIndexs5x5);
@@ -48,7 +48,7 @@ namespace Fluid3d {
 	}
 
 	void DepthFilter::PreCalculate() {
-		// ‘§º∆À„»®÷ÿ[0, 2¶“]
+		// È¢ÑËÆ°ÁÆóÊùÉÈáç[0, 2œÉ]
 		mBufferSize = glm::ivec2(128, 128);
 		mWeightBuffer.resize(mBufferSize.x * mBufferSize.y);
 		int p = 0;
@@ -69,7 +69,7 @@ namespace Fluid3d {
 	}
 
 	void DepthFilter::Uploadbuffers() {
-		// ¥´»ÎŒ∆¿Ì 
+		// ‰º†ÂÖ•Á∫πÁêÜ 
 		glGenTextures(1, &mTexDepthFilter);
 		glBindTexture(GL_TEXTURE_2D, mTexDepthFilter);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, mBufferSize.x, mBufferSize.y, 0, GL_RED, GL_FLOAT, mWeightBuffer.data());
@@ -79,7 +79,7 @@ namespace Fluid3d {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-		// À˜“˝¥´»ÎBuffer
+		// Á¥¢Âºï‰º†ÂÖ•Buffer
 		std::vector<glm::ivec2> kernelIndexes = GenerateIndexes(2);
 		glGenBuffers(1, &mBufferKernelIndexs5x5);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, mBufferKernelIndexs5x5);

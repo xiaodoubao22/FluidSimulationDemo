@@ -1,4 +1,4 @@
-#ifndef PARTICAL_SYSTEM_3D_H
+ï»¿#ifndef PARTICAL_SYSTEM_3D_H
 #define PARTICAL_SYSTEM_3D_H
 
 #include <glm/glm.hpp>
@@ -34,29 +34,29 @@ namespace Fluid3d {
 		uint32_t GetBlockIdByPosition(glm::vec3 position);
 		void UpdateData();
 	public:
-		// Á£×Ó²ÎÊı
-		float mSupportRadius = Para3d::supportRadius;    // Ö§³Å°ë¾¶
+		// ç²’å­å‚æ•°
+		float mSupportRadius = Para3d::supportRadius;    // æ”¯æ’‘åŠå¾„
 		float mSupportRadius2 = mSupportRadius * mSupportRadius;
-		float mParticalRadius = Para3d::particalRadius;   // Á£×Ó°ë¾¶
+		float mParticalRadius = Para3d::particalRadius;   // ç²’å­åŠå¾„
 		float mParticalDiameter = Para3d::     particalDiameter;
-		float mVolume = std::pow(mParticalDiameter, 3);    // Ìå»ı
-		float mMass = Para3d::density0 * mVolume;  // ÖÊÁ¿
-		float mViscosity = Para3d::viscosity;            // Õ³¶ÈÏµÊı
-		float mExponent = Para3d::exponent;              // Ñ¹Á¦Ö¸Êı
-		int mStiffness = Para3d::stiffness;            // ¸Õ¶È
+		float mVolume = std::pow(mParticalDiameter, 3);    // ä½“ç§¯
+		float mMass = Para3d::density0 * mVolume;  // è´¨é‡
+		float mViscosity = Para3d::viscosity;            // ç²˜åº¦ç³»æ•°
+		float mExponent = Para3d::exponent;              // å‹åŠ›æŒ‡æ•°
+		int mStiffness = Para3d::stiffness;            // åˆšåº¦
 		std::vector<ParticalInfo3d> mParticalInfos;
 		int mMaxNeighbors = 512;
 
-		// ÈİÆ÷²ÎÊı
+		// å®¹å™¨å‚æ•°
 		glm::vec3 mLowerBound = glm::vec3(FLT_MAX);
 		glm::vec3 mUpperBound = glm::vec3(-FLT_MAX);
 		glm::vec3 mContainerCenter = glm::vec3(0.0f);
-		glm::uvec3 mBlockNum = glm::uvec3(0);	// XYZÖáÓĞ¼¸¸öblock
+		glm::uvec3 mBlockNum = glm::uvec3(0);	// XYZè½´æœ‰å‡ ä¸ªblock
 		glm::vec3 mBlockSize = glm::vec3(0.0f);
 		std::vector<glm::uvec2> mBlockExtens;
 		std::vector<int32_t> mBlockIdOffs;
 
-		// ºËº¯Êı
+		// æ ¸å‡½æ•°
 		Glb::WCubicSpline3d mW = Glb::WCubicSpline3d(mSupportRadius);
 
 	};

@@ -1,12 +1,12 @@
-#ifndef PARAMETERS_3D_H
+ï»¿#ifndef PARAMETERS_3D_H
 #define PARAMETERS_3D_H
 
 namespace Para3d {
-	// Çó½âÆ÷²ÎÊı
+	// æ±‚è§£å™¨å‚æ•°
 	const float dt = 2e-4;
 	const int substep = 8;
 
-	// ÎïÀí²ÎÊı
+	// ç‰©ç†å‚æ•°
 	const float supportRadius = 0.025;
 	const float particalRadius = 0.005;
 	const float particalDiameter = particalRadius * 2.0;
@@ -16,7 +16,7 @@ namespace Para3d {
 	const float exponent = 7.0f;
 	const float viscosity = 8e-6f;
 
-	// ¹âÑ§²ÎÊı
+	// å…‰å­¦å‚æ•°
 	const float IOR = 1.3;
 	const float IOR_BIAS = 0.05;
 	const glm::vec3 F0 = { 0.15, 0.15, 0.15 };
@@ -25,7 +25,7 @@ namespace Para3d {
 	const float CAUSTIC_FACTOR = 0.006;
 	const float THICKNESS_FACTOR = 0.5;
 
-	// ¼¸ºÎ²ÎÊı
+	// å‡ ä½•å‚æ•°
 	const float zFar = 100.0;
 	const float zNear = 0.1;
 }

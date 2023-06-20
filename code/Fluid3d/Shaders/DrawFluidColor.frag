@@ -1,4 +1,4 @@
-#version 430 core
+﻿#version 430 core
 
 // ----------const----------
 const float EPS = 1e-5;

@@ -1,4 +1,4 @@
-#version 450
+﻿#version 450
 
 const float EPS = 1e-5;
 const float FLT_MAX = 1e+10;

@@ -1,4 +1,4 @@
-#ifndef SKY_BOX_H
+﻿#ifndef SKY_BOX_H
 #define SKY_BOX_H
 
 #include <vector>

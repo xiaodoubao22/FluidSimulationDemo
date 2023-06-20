@@ -1,4 +1,4 @@
-#include "FluidShadowMap.h"
+ï»¿#include "FluidShadowMap.h"
 #include <iostream>
 #include "Global.h"
 #include "Parameters3d.h"
@@ -41,7 +41,7 @@ namespace Fluid3d {
     }
 
     void FluidShadowMap::Update(GLuint vaoParticals, int32_t particalNum, DepthFilter* depthFilter) {
-        // äÖÈ¾Éî¶ÈÍ¼
+        // æ¸²æŸ“æ·±åº¦å›¾
         glViewport(0, 0, mWidth, mHeight);
         glBindFramebuffer(GL_FRAMEBUFFER, mFbo);
         glClearColor(0.5f, 0.0f, 0.0f, 0.0f);
@@ -53,14 +53,14 @@ namespace Fluid3d {
         mPointSpriteZValue->UnUse();
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        // Æ½»¬Éî¶ÈÍ¼
+        // å¹³æ»‘æ·±åº¦å›¾
         mZBufferA = mTextureZBuffer;
         mZBufferB = mTextureTempZBuffer;
         depthFilter->Filter(mZBufferA, mZBufferB, glm::ivec2(mWidth, mHeight));
     }
 
     void FluidShadowMap::DrawCaustic(RenderCamera* camera, GLuint vaoNull, const glm::mat4& model) {
-        // äÖÈ¾½¹É¢Í¼
+        // æ¸²æŸ“ç„¦æ•£å›¾
         glViewport(0, 0, mWidth, mHeight);
         glBindFramebuffer(GL_FRAMEBUFFER, mFboCaustic);
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
