@@ -6,8 +6,8 @@ project(FluidSimulation)
 # [third_party]设置三方库包含路径
 set(THIRD_PARTY ${CMAKE_SOURCE_DIR}/../third_party)
 set(GLAD_DIR ${THIRD_PARTY}/glad/include)
-set(GLM_DIR ${THIRD_PARTY}/glm-master)
-set(GLFW_DIR ${THIRD_PARTY}/glfw-3.3.8-x64-build/include)
+set(GLM_DIR ${THIRD_PARTY}/glm)
+set(GLFW_DIR ${THIRD_PARTY}/glfw-3.3.8.bin.WIN64)
 set(STB_DIR ${THIRD_PARTY}/stb)
 
 # [common]设置头文件路径
@@ -103,7 +103,7 @@ set(FLUID_3D_SHADER_FILES
     )
 
 # 全局包含目录
-include_directories(${GLAD_DIR} ${GLM_DIR} ${GLFW_DIR} ${STB_DIR} ${COMMON_INC_DIR})
+include_directories(${GLAD_DIR} ${GLM_DIR} ${GLFW_DIR}/include ${STB_DIR} ${COMMON_INC_DIR})
 
 # -----------2D项目-----------
 set(PROJECT_2D FluidSimulation2D)
@@ -120,7 +120,7 @@ add_executable(${PROJECT_2D}
 target_include_directories(${PROJECT_2D} PUBLIC ${FLUID_2D_INC_DIR})
 # [third_party]链接glfw静态库
 target_link_libraries(${PROJECT_2D} 
-    ${CMAKE_SOURCE_DIR}/../third_party/glfw-3.3.8-x64-build/lib_vs2022_64_release/glfw3.lib
+    ${GLFW_DIR}/lib-vc2022/glfw3.lib
     )
 
 # -----------3D项目-----------
@@ -138,7 +138,7 @@ add_executable(${PROJECT_3D}
 target_include_directories(${PROJECT_3D} PUBLIC ${FLUID_3D_INC_DIR})
 # [third_party]链接glfw静态库
 target_link_libraries(${PROJECT_3D} 
-    ${CMAKE_SOURCE_DIR}/../third_party/glfw-3.3.8-x64-build/lib_vs2022_64_release/glfw3.lib
+    ${GLFW_DIR}/lib-vc2022/glfw3.lib
     )
 
 set(ALL_FILES
