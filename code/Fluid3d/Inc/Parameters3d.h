@@ -18,11 +18,11 @@ namespace Para3d {
 
     // 光学参数
     const float IOR = 1.3;
-    const float IOR_BIAS = 0.05;
+    const float IOR_BIAS = 0.02;
     const glm::vec3 F0 = { 0.15, 0.15, 0.15 };
     const glm::vec3 FLUID_COLOR = { 0.1, 0.5, 1.0 };
     const glm::vec3 SHADOW_COLOR = 0.5f * FLUID_COLOR;
-    const float CAUSTIC_FACTOR = 0.006;
+    const float CAUSTIC_FACTOR = 0.004;
     const float THICKNESS_FACTOR = 0.5;
 
     // 几何参数

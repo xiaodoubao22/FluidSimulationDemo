@@ -33,7 +33,7 @@ namespace Fluid3d {
             mBlurZ->SetInt("filterInterval", std::pow(2, i));
             glBindImageTexture(0, bufferA, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
             glBindImageTexture(1, bufferB, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
-            glDispatchCompute(imageSize.x, imageSize.y, 1);
+            glDispatchCompute(imageSize.x / 32 + 1, imageSize.y / 32 + 1, 1);
             glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
             std::swap(bufferA, bufferB);
         }
@@ -43,7 +43,7 @@ namespace Fluid3d {
         mBlurZ->SetInt("filterInterval", 1);
         glBindImageTexture(0, bufferA, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R32F);
         glBindImageTexture(1, bufferB, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_R32F);
-        glDispatchCompute(imageSize.x, imageSize.y, 1);
+        glDispatchCompute(imageSize.x / 32 + 1, imageSize.y / 32 + 1, 1);
         glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
     }
 

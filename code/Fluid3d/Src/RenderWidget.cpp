@@ -105,7 +105,7 @@ namespace Fluid3d {
             return;
         }
 
-        glFinish();
+        //glFinish();
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, mBufferParticals);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, mBufferBlocks);
         glActiveTexture(GL_TEXTURE1);
@@ -113,7 +113,7 @@ namespace Fluid3d {
         glBindImageTexture(0, mTestTexture, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
         mComputeParticals->Use();
         mComputeParticals->SetVec3("gGravityDir", -Glb::Z_AXIS);
-        mComputeParticals->SetVec3("gExternelAccleration", mExternelAccleration * 0.5f);
+        mComputeParticals->SetVec3("gExternelAccleration", mExternelAccleration);
         mComputeParticals->SetInt("particalNum", mParticalNum);
         for (int pass = 0; pass <= 1; pass++) {
             mComputeParticals->SetUInt("pass", pass);
