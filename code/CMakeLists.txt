@@ -10,97 +10,42 @@ set(GLM_DIR ${THIRD_PARTY}/glm)
 set(GLFW_DIR ${THIRD_PARTY}/glfw-3.3.8.bin.WIN64)
 set(STB_DIR ${THIRD_PARTY}/stb)
 
-# [common]设置头文件路径
+# [common]
 set(COMMON_INC_DIR ${CMAKE_SOURCE_DIR}/Common/Inc)
-set(COMMON_INC_FILES
-    ${COMMON_INC_DIR}/ComputeShader.h
-    ${COMMON_INC_DIR}/Shader.h
-    ${COMMON_INC_DIR}/WCubicSpline.h
-    ${COMMON_INC_DIR}/Global.h
-    
-    )
-# [common]设置源文件路径
-set(COMMON_SRC_DIR ${CMAKE_SOURCE_DIR}/Common/Src)
-set(COMMON_SRC_FILES
-    ${COMMON_SRC_DIR}/ComputeShader.cpp
-    ${COMMON_SRC_DIR}/Shader.cpp
-    ${COMMON_SRC_DIR}/WCubicSpline.cpp
-    )
+file(GLOB COMMON_INC_FILES ${COMMON_INC_DIR}/*.h)
+file(GLOB COMMON_SRC_FILES ${CMAKE_SOURCE_DIR}/Common/Src/*.cpp)
 
-# [Fluid2d]设置头文件路径
+# [Fluid2d]
 set(FLUID_2D_INC_DIR ${CMAKE_SOURCE_DIR}/Fluid2d/Inc)
-set(FLUID_2D_INC_FILES
-    ${FLUID_2D_INC_DIR}/Parameters.h
-    ${FLUID_2D_INC_DIR}/ParticalSystem.h
-    ${FLUID_2D_INC_DIR}/RenderWidget.h
-    ${FLUID_2D_INC_DIR}/Solver.h
-    )
-# [Fluid2d]设置源文件路径
-set(FLUID_2D_SRC_DIR ${CMAKE_SOURCE_DIR}/Fluid2d/Src)
-set(FLUID_2D_SRC_FILES
-    ${FLUID_2D_SRC_DIR}/ParticalSystem.cpp
-    ${FLUID_2D_SRC_DIR}/RenderWidget.cpp
-    ${FLUID_2D_SRC_DIR}/Solver.cpp
+file(GLOB FLUID_2D_INC_FILES ${FLUID_2D_INC_DIR}/*.h)
+file(GLOB FLUID_2D_SRC_FILES
+    ${CMAKE_SOURCE_DIR}/Fluid2d/Src/*.cpp
     ${CMAKE_SOURCE_DIR}/Fluid2d/Main2d.cpp
-    )
-# [Fluid2d]设置Shader路径
-set(FLUID_2D_SHADER_DIR ${CMAKE_SOURCE_DIR}/Fluid2d/Shaders)
-set(FLUID_2D_SHADER_FILES
-    ${FLUID_2D_SHADER_DIR}/DrawMilk.vert
-    ${FLUID_2D_SHADER_DIR}/DrawMilk.frag
-    ${FLUID_2D_SHADER_DIR}/DrawParticals.vert
-    ${FLUID_2D_SHADER_DIR}/DrawParticals.frag
-    ${FLUID_2D_SHADER_DIR}/DrawSdf.vert
-    ${FLUID_2D_SHADER_DIR}/DrawSdf.geom
-    ${FLUID_2D_SHADER_DIR}/DrawSdf.frag
-    )
+)
+file(GLOB FLUID_2D_SHADER_FILES
+    ${CMAKE_SOURCE_DIR}/Fluid2d/*.vert
+    ${CMAKE_SOURCE_DIR}/Fluid2d/*.frag
+    ${CMAKE_SOURCE_DIR}/Fluid2d/*.geom
+)
 
-# [Fluid3d]设置头文件路径
+# [Fluid3d]
 set(FLUID_3D_INC_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Inc)
-set(FLUID_3D_INC_FILES
-    ${FLUID_3D_INC_DIR}/DepthFilter.h
-    ${FLUID_3D_INC_DIR}/FluidShadowMap.h
-    ${FLUID_3D_INC_DIR}/Material.h
-    ${FLUID_3D_INC_DIR}/Parameters3d.h
-    ${FLUID_3D_INC_DIR}/ParticalSystem3d.h
-    ${FLUID_3D_INC_DIR}/RenderCamera.h
-    ${FLUID_3D_INC_DIR}/RenderWidget.h
-    ${FLUID_3D_INC_DIR}/SkyBox.h
-    )
-# [Fluid3d]设置源文件路径
-set(FLUID_3D_SRC_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Src)
-set(FLUID_3D_SRC_FILES
-    ${FLUID_3D_SRC_DIR}/DepthFilter.cpp
-    ${FLUID_3D_SRC_DIR}/FluidShadowMap.cpp
-    ${FLUID_3D_SRC_DIR}/Material.cpp
-    ${FLUID_3D_SRC_DIR}/ParticalSystem3d.cpp
-    ${FLUID_3D_SRC_DIR}/RenderCamera.cpp
-    ${FLUID_3D_SRC_DIR}/RenderWidget.cpp
-    ${FLUID_3D_SRC_DIR}/SkyBox.cpp
+file(GLOB FLUID_3D_INC_FILES ${FLUID_3D_INC_DIR}/*.h)
+file(GLOB FLUID_3D_SRC_FILES
+    ${CMAKE_SOURCE_DIR}/Fluid3d/Src/*.cpp
     ${CMAKE_SOURCE_DIR}/Fluid3d/Main3d.cpp
-    )
-# [Fluid3d]设置Shader路径
-set(FLUID_3D_SHADER_DIR ${CMAKE_SOURCE_DIR}/Fluid3d/Shaders)
-set(FLUID_3D_SHADER_FILES
-    ${FLUID_3D_SHADER_DIR}/BlurZ.comp
-    ${FLUID_3D_SHADER_DIR}/CausticMap.frag
-    ${FLUID_3D_SHADER_DIR}/CausticMap.vert
-    ${FLUID_3D_SHADER_DIR}/ComputeParticals.comp
-    ${FLUID_3D_SHADER_DIR}/DrawColor3d.frag
-    ${FLUID_3D_SHADER_DIR}/DrawColor3d.vert
-    ${FLUID_3D_SHADER_DIR}/DrawFluidColor.frag
-    ${FLUID_3D_SHADER_DIR}/DrawFluidColor.vert
-    ${FLUID_3D_SHADER_DIR}/DrawModel.frag
-    ${FLUID_3D_SHADER_DIR}/DrawModel.vert
-    ${FLUID_3D_SHADER_DIR}/PointSprite.geom
-    ${FLUID_3D_SHADER_DIR}/PointSprite.vert
-    ${FLUID_3D_SHADER_DIR}/PointSpriteThickness.frag
-    ${FLUID_3D_SHADER_DIR}/PointSpriteZValue.frag
-    ${FLUID_3D_SHADER_DIR}/ScreenQuad.frag
-    ${FLUID_3D_SHADER_DIR}/ScreenQuad.vert
-    ${FLUID_3D_SHADER_DIR}/SkyBox.frag
-    ${FLUID_3D_SHADER_DIR}/SkyBox.vert
-    )
+)
+file(GLOB FLUID_2D_SHADER_FILES
+    ${CMAKE_SOURCE_DIR}/Fluid3d/Shaders/*.vert
+    ${CMAKE_SOURCE_DIR}/Fluid3d/Shaders/*.frag
+    ${CMAKE_SOURCE_DIR}/Fluid3d/Shaders/*.geom
+    ${CMAKE_SOURCE_DIR}/Fluid3d/Shaders/*.comp
+)
+
+# [FrameGeneration]
+set(FRAME_GENERATION_INC_DIR ${CMAKE_SOURCE_DIR}/FrameGeneration/Framework/Inc)
+file(GLOB FRAME_GENERATION_INC_FILES ${FRAME_GENERATION_INC_DIR}/*.h)
+file(GLOB FRAME_GENERATION_SRC_FILES ${CMAKE_SOURCE_DIR}/FrameGeneration/Framework/Src/*.cpp)
 
 # 全局包含目录
 include_directories(${GLAD_DIR} ${GLM_DIR} ${GLFW_DIR}/include ${STB_DIR} ${COMMON_INC_DIR})
@@ -141,6 +86,21 @@ target_link_libraries(${PROJECT_3D}
     ${GLFW_DIR}/lib-vc2022/glfw3.lib
     )
 
+# -----------FrameGeneration项目-----------
+set(PROJECT_FG FrameGeneration)
+add_executable(${PROJECT_FG}
+    ${COMMON_SRC_FILES}
+    ${FRAME_GENERATION_SRC_FILES}
+    ${CMAKE_SOURCE_DIR}/FrameGeneration/MainFG.cpp
+    ${THIRD_PARTY}/glad/src/glad.c
+    )
+target_include_directories(${PROJECT_FG} PUBLIC ${FRAME_GENERATION_INC_DIR})
+target_link_libraries(${PROJECT_FG}
+    ${GLFW_DIR}/lib-vc2022/glfw3.lib
+    )
+
+
+# [vs]设置显示层级
 set(ALL_FILES
     ${COMMON_INC_FILES} 
     ${COMMON_SRC_FILES}
@@ -150,11 +110,13 @@ set(ALL_FILES
     ${FLUID_2D_SRC_FILES}
     ${FLUID_2D_SHADER_FILES}
     ${FLUID_3D_SHADER_FILES}
+    ${FRAME_GENERATION_SRC_FILES}
+    ${FRAME_GENERATION_INC_FILES}
+    ${CMAKE_SOURCE_DIR}/FrameGeneration/MainFG.cpp
+    ${FW_SRC_FILES}
     )
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${ALL_FILES})
 
 # [vs]设置启动项目
-set_property (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_3D})
-
-
+set_property (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_FG})
 
