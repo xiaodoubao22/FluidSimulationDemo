@@ -1,6 +1,4 @@
 #include <iostream>
-#include <sstream>
-#include <iomanip>
 #include <chrono>
 #include "Framework/Inc/Window.h"
 #include "Framework/Inc/VideoLoader.h"
@@ -8,6 +6,22 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Mesh.h"
+
+void GenerateQuadVertices(float videoAspect, float screenAspect, float* vertices) {
+    float halfWidth, halfHeight;
+    if (videoAspect > screenAspect) {
+        halfHeight = 1.0f;
+        halfWidth = screenAspect * halfHeight / videoAspect;
+    } else {
+        halfWidth = 1.0f;
+        halfHeight = halfWidth * videoAspect / screenAspect;
+    }
+
+    vertices[0]  =  halfWidth; vertices[1]  =  halfHeight; vertices[2]  = 0.0f; vertices[3]  = 1.0f; vertices[4]  = 0.0f;
+    vertices[5]  =  halfWidth; vertices[6]  = -halfHeight; vertices[7]  = 0.0f; vertices[8]  = 1.0f; vertices[9]  = 1.0f;
+    vertices[10] = -halfWidth; vertices[11] = -halfHeight; vertices[12] = 0.0f; vertices[13] = 0.0f; vertices[14] = 1.0f;
+    vertices[15] = -halfWidth; vertices[16] =  halfHeight; vertices[17] = 0.0f; vertices[18] = 0.0f; vertices[19] = 0.0f;
+}
 
 int main()
 {
@@ -21,19 +35,13 @@ int main()
         return -1;
     }
 
-    int width = videoLoader.GetWidth();
-    int height = videoLoader.GetHeight();
-
-    float aspectRatio = static_cast<float>(width) / height;
+    int videoWidth = videoLoader.GetWidth();
+    int videoHeight = videoLoader.GetHeight();
+    float videoAspect = static_cast<float>(videoWidth) / videoHeight;
     float screenAspect = 1280.0f / 720.0f;
-    float scaleX = aspectRatio / screenAspect;
 
-    float vertices[] = {
-         scaleX,  0.5f, 0.0f,  1.0f, 0.0f,
-         scaleX, -0.5f, 0.0f,  1.0f, 1.0f,
-        -scaleX, -0.5f, 0.0f,  0.0f, 1.0f,
-        -scaleX,  0.5f, 0.0f,  0.0f, 0.0f
-    };
+    float vertices[20];
+    GenerateQuadVertices(videoAspect, screenAspect, vertices);
     unsigned int indices[] = { 0, 1, 3, 1, 2, 3 };
 
     Glb::Mesh quadMesh;
@@ -46,11 +54,11 @@ int main()
     Glb::Texture videoTexture;
     videoTexture.Create();
     videoTexture.Bind();
-    videoTexture.SetWrapS(GL_REPEAT);
-    videoTexture.SetWrapT(GL_REPEAT);
+    videoTexture.SetWrapS(GL_CLAMP_TO_BORDER);
+    videoTexture.SetWrapT(GL_CLAMP_TO_BORDER);
     videoTexture.SetMinFilter(GL_LINEAR);
     videoTexture.SetMagFilter(GL_LINEAR);
-    videoTexture.Allocate(width, height, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    videoTexture.Allocate(videoWidth, videoHeight, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     videoTexture.UnBind();
 
     Glb::Shader videoShader;
@@ -62,7 +70,6 @@ int main()
     }
     videoShader.Use();
     videoShader.SetInt("videoTexture", 0);
-    videoShader.SetFloat("uScaleX", 1.0f);
     videoShader.UnUse();
 
     Fw::VideoFrame frame;
@@ -91,7 +98,7 @@ int main()
                       << " | Frame: " << videoLoader.GetCurrentFrame() << " / " << videoLoader.GetTotalFrames() << "\r" << std::flush;
 
             videoTexture.Bind();
-            videoTexture.Update(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, frame.data[0]);
+            videoTexture.Update(0, 0, videoWidth, videoHeight, GL_RGB, GL_UNSIGNED_BYTE, frame.data[0]);
             videoTexture.UnBind();
         }
 
@@ -106,11 +113,7 @@ int main()
 
         window.SwapBuffers();
         renderFPSCounter.Tick();
-        
-        std::ostringstream title;
-        title << "Frame Generation | Render FPS: " << std::fixed << std::setprecision(1) << renderFPSCounter.GetFPS()
-              << " | Video FPS: " << videoFPSCounter.GetFPS();
-        window.SetTitle(title.str());
+        window.SetTitle(renderFPSCounter.GetFPS(), videoFPSCounter.GetFPS());
     }
 
     videoLoader.Close();

@@ -15,7 +15,7 @@ namespace Fw {
         void SwapBuffers() const;
         void PollEvents() const;
         void SetShouldClose(bool value);
-        void SetTitle(const std::string& title) const;
+        void SetTitle(float renderFPS, float videoFPS) const;
 
     private:
         GLFWwindow* mWindow;

@@ -1,4 +1,6 @@
 #include "Window.h"
+#include <sstream>
+#include <iomanip>
 
 namespace Fw {
     Window::Window(int width, int height, const std::string& title) : mWindow(nullptr) {
@@ -43,7 +45,10 @@ namespace Fw {
         glfwSetWindowShouldClose(mWindow, value);
     }
 
-    void Window::SetTitle(const std::string& title) const {
-        glfwSetWindowTitle(mWindow, title.c_str());
+    void Window::SetTitle(float renderFPS, float videoFPS) const {
+        std::ostringstream oss;
+        oss << "Frame Generation | Render FPS: " << std::fixed << std::setprecision(1) << renderFPS
+            << " | Video FPS: " << videoFPS;
+        glfwSetWindowTitle(mWindow, oss.str().c_str());
     }
 }
