@@ -5,29 +5,9 @@
 #include "Framework/Inc/Window.h"
 #include "Framework/Inc/VideoLoader.h"
 #include "Framework/Inc/FPSCounter.h"
-
-const char* vertexShaderSource = R"(
-    #version 330 core
-    layout (location = 0) in vec3 aPos;
-    layout (location = 1) in vec2 aTexCoord;
-    out vec2 TexCoord;
-    void main()
-    {
-        gl_Position = vec4(aPos, 1.0);
-        TexCoord = aTexCoord;
-    }
-)";
-
-const char* fragmentShaderSource = R"(
-    #version 330 core
-    in vec2 TexCoord;
-    out vec4 FragColor;
-    uniform sampler2D videoTexture;
-    void main()
-    {
-        FragColor = texture(videoTexture, TexCoord);
-    }
-)";
+#include "Shader.h"
+#include "Texture.h"
+#include "Mesh.h"
 
 int main()
 {
@@ -47,58 +27,43 @@ int main()
     float aspectRatio = static_cast<float>(width) / height;
     float screenAspect = 1280.0f / 720.0f;
     float scaleX = aspectRatio / screenAspect;
-    float scaledWidth = scaleX * 1.0f;
 
     float vertices[] = {
-        scaledWidth,  0.5f, 0.0f,  1.0f, 0.0f,
-        scaledWidth, -0.5f, 0.0f,  1.0f, 1.0f,
-       -scaledWidth, -0.5f, 0.0f,  0.0f, 1.0f,
-       -scaledWidth,  0.5f, 0.0f,  0.0f, 0.0f
+         scaleX,  0.5f, 0.0f,  1.0f, 0.0f,
+         scaleX, -0.5f, 0.0f,  1.0f, 1.0f,
+        -scaleX, -0.5f, 0.0f,  0.0f, 1.0f,
+        -scaleX,  0.5f, 0.0f,  0.0f, 0.0f
     };
     unsigned int indices[] = { 0, 1, 3, 1, 2, 3 };
 
-    unsigned int VAO, VBO, EBO, texture;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glGenTextures(1, &texture);
+    Glb::Mesh quadMesh;
+    quadMesh.Create();
+    quadMesh.SetVertices(vertices, sizeof(vertices));
+    quadMesh.SetIndices(indices, 6);
+    quadMesh.AddAttribute(0, 3, 5 * sizeof(float), 0);
+    quadMesh.AddAttribute(1, 2, 5 * sizeof(float), 3 * sizeof(float));
 
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    Glb::Texture videoTexture;
+    videoTexture.Create();
+    videoTexture.Bind();
+    videoTexture.SetWrapS(GL_REPEAT);
+    videoTexture.SetWrapT(GL_REPEAT);
+    videoTexture.SetMinFilter(GL_LINEAR);
+    videoTexture.SetMagFilter(GL_LINEAR);
+    videoTexture.Allocate(width, height, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    videoTexture.UnBind();
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-
-    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
-
-    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
-
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glUseProgram(shaderProgram);
-    glUniform1i(glGetUniformLocation(shaderProgram, "videoTexture"), 0);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    Glb::Shader videoShader;
+    std::string vertPath = "../code/FrameGeneration/Shaders/VideoFrame.vert";
+    std::string fragPath = "../code/FrameGeneration/Shaders/VideoFrame.frag";
+    if (videoShader.BuildFromFile(vertPath, fragPath) != 0) {
+        std::cerr << "Failed to build shader" << std::endl;
+        return -1;
+    }
+    videoShader.Use();
+    videoShader.SetInt("videoTexture", 0);
+    videoShader.SetFloat("uScaleX", 1.0f);
+    videoShader.UnUse();
 
     Fw::VideoFrame frame;
     Fw::FPSCounter renderFPSCounter;
@@ -125,17 +90,19 @@ int main()
                       << " | Render FPS: " << renderFPSCounter.GetFPS() 
                       << " | Frame: " << videoLoader.GetCurrentFrame() << " / " << videoLoader.GetTotalFrames() << "\r" << std::flush;
 
-            glBindTexture(GL_TEXTURE_2D, texture);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, frame.data[0]);
+            videoTexture.Bind();
+            videoTexture.Update(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, frame.data[0]);
+            videoTexture.UnBind();
         }
 
         window.PollEvents();
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        videoShader.Use();
+        videoTexture.Bind();
+        quadMesh.Draw();
+        videoTexture.UnBind();
 
         window.SwapBuffers();
         renderFPSCounter.Tick();
@@ -147,11 +114,6 @@ int main()
     }
 
     videoLoader.Close();
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    glDeleteTextures(1, &texture);
-    glDeleteProgram(shaderProgram);
 
     return 0;
 }

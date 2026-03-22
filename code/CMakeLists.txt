@@ -47,6 +47,10 @@ file(GLOB FLUID_2D_SHADER_FILES
 set(FRAME_GENERATION_INC_DIR ${CMAKE_SOURCE_DIR}/FrameGeneration/Framework/Inc)
 file(GLOB FRAME_GENERATION_INC_FILES ${FRAME_GENERATION_INC_DIR}/*.h)
 file(GLOB FRAME_GENERATION_SRC_FILES ${CMAKE_SOURCE_DIR}/FrameGeneration/Framework/Src/*.cpp)
+file(GLOB FRAME_GENERATION_SHADER_FILES
+    ${CMAKE_SOURCE_DIR}/FrameGeneration/Shaders/*.vert
+    ${CMAKE_SOURCE_DIR}/FrameGeneration/Shaders/*.frag
+)
 
 # 全局包含目录
 include_directories(${GLAD_DIR} ${GLM_DIR} ${GLFW_DIR}/include ${STB_DIR} ${COMMON_INC_DIR} ${FFMPEG_DIR}/include)
@@ -94,6 +98,7 @@ add_executable(${PROJECT_FG}
     ${FRAME_GENERATION_SRC_FILES}
     ${CMAKE_SOURCE_DIR}/FrameGeneration/MainFG.cpp
     ${THIRD_PARTY}/glad/src/glad.c
+    ${FRAME_GENERATION_SHADER_FILES}
     )
 target_include_directories(${PROJECT_FG} PUBLIC ${FRAME_GENERATION_INC_DIR})
 target_link_libraries(${PROJECT_FG}
