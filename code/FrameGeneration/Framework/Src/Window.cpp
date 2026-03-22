@@ -42,4 +42,8 @@ namespace Fw {
     void Window::SetShouldClose(bool value) {
         glfwSetWindowShouldClose(mWindow, value);
     }
+
+    void Window::SetTitle(const std::string& title) const {
+        glfwSetWindowTitle(mWindow, title.c_str());
+    }
 }

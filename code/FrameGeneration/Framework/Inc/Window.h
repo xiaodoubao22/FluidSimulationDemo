@@ -15,6 +15,7 @@ namespace Fw {
         void SwapBuffers() const;
         void PollEvents() const;
         void SetShouldClose(bool value);
+        void SetTitle(const std::string& title) const;
 
     private:
         GLFWwindow* mWindow;

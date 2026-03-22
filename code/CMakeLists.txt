@@ -9,6 +9,7 @@ set(GLAD_DIR ${THIRD_PARTY}/glad/include)
 set(GLM_DIR ${THIRD_PARTY}/glm)
 set(GLFW_DIR ${THIRD_PARTY}/glfw-3.3.8.bin.WIN64)
 set(STB_DIR ${THIRD_PARTY}/stb)
+set(FFMPEG_DIR ${THIRD_PARTY}/FFmpeg)
 
 # [common]
 set(COMMON_INC_DIR ${CMAKE_SOURCE_DIR}/Common/Inc)
@@ -48,7 +49,7 @@ file(GLOB FRAME_GENERATION_INC_FILES ${FRAME_GENERATION_INC_DIR}/*.h)
 file(GLOB FRAME_GENERATION_SRC_FILES ${CMAKE_SOURCE_DIR}/FrameGeneration/Framework/Src/*.cpp)
 
 # 全局包含目录
-include_directories(${GLAD_DIR} ${GLM_DIR} ${GLFW_DIR}/include ${STB_DIR} ${COMMON_INC_DIR})
+include_directories(${GLAD_DIR} ${GLM_DIR} ${GLFW_DIR}/include ${STB_DIR} ${COMMON_INC_DIR} ${FFMPEG_DIR}/include)
 
 # -----------2D项目-----------
 set(PROJECT_2D FluidSimulation2D)
@@ -97,6 +98,10 @@ add_executable(${PROJECT_FG}
 target_include_directories(${PROJECT_FG} PUBLIC ${FRAME_GENERATION_INC_DIR})
 target_link_libraries(${PROJECT_FG}
     ${GLFW_DIR}/lib-vc2022/glfw3.lib
+    ${FFMPEG_DIR}/lib/avcodec.lib
+    ${FFMPEG_DIR}/lib/avformat.lib
+    ${FFMPEG_DIR}/lib/avutil.lib
+    ${FFMPEG_DIR}/lib/swscale.lib 
     )
 
 
